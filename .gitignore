@@ -4,3 +4,6 @@ make.log
 cscope.out
 *~
 **/_build/*
+utils/docker-compose/bin/
+utils/docker-compose/crypto-config/
+utils/docker-compose/config/
