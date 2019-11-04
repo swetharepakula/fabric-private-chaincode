@@ -54,6 +54,7 @@ services:
       # - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
       # - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - DOCKER_HOST=unix:///host/var/run/docker.sock
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: /project/src/github.com/hyperledger-labs/fabric-private-chaincode/fabric/bin/peer.sh node start
     # command: peer node start

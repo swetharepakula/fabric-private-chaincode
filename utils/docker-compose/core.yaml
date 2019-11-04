@@ -12,7 +12,7 @@
 peer:
 
     # The Peer id is used for identifying this Peer instance.
-    id: jdoe_test
+    id: peer0.org1.example.com
 
     # The networkId allows for logical seperation of networks
     networkId: dev_test
