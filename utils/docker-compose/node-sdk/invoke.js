@@ -15,6 +15,8 @@ const ccp = JSON.parse(ccpJSON);
 async function main() {
     try {
         var user = process.argv[2]
+        var channel = process.argv[3]
+        var chaincode = "ecc_" + process.argv[4]
 
         // Create a new file system based wallet for managing identities.
         const walletPath = path.join(process.cwd(), 'wallet');
@@ -34,13 +36,13 @@ async function main() {
         await gateway.connect(ccp, { wallet, identity: user, discovery: { enabled: false } });
 
         // Get the network (channel) our contract is deployed to.
-        const network = await gateway.getNetwork('mychannel');
+        const network = await gateway.getNetwork(channel);
 
         // Get the contract from the network.
-        const contract = network.getContract('ecc_helloworld_test');
+        const contract = network.getContract(chaincode);
 
         // Submit the specified transaction.
-        const result = await contract.submitTransaction(...process.argv.slice(3,process.argv.length));
+        const result = await contract.submitTransaction(...process.argv.slice(5,process.argv.length));
         console.log(`Transaction has been submitted, result is: ${result.toString()}`);
 
         // Disconnect from the gateway.

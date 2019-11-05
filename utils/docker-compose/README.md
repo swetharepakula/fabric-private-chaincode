@@ -115,9 +115,9 @@ asset1:100
 ```
 
 ## Create a User with Fabric-CA
-1. Ensure you have all the node modueles
+1. Ensure you have all the node modules
 ```
-npm Install
+npm install
 ```
 
 1. Enter into the `node-sdk` directory, to use the node sdk scripts to create
@@ -142,18 +142,16 @@ node registerUser.js <username>
 After running this with your desired username, the directory `wallet/<username>`
 should have been created and have the public and private key pair.
 
-## Interact with the Hello World Chaincode
-**NOTE** Currently the invoke and query script assumes your chaincode is named
-`helloworld_test` and it has been instantiated on `mychannel`.
+## Interact with the chaincode using the Node SDK
 
-1. Ensure you have all the node modueles
+1. Ensure you have all the node modules
 ```
-npm Install
+npm install
 ```
 
 1. Query the asset you stored previously
 ```
-node query.js <username> retrieveAsset asset1
+node query.js <username> mychannel helloworld_test retrieveAsset asset1
 ```
 The response should look similar to what you saw above when you queried using
 the peer cli.
@@ -167,7 +165,7 @@ Transaction has been submitted, result is:
 ```
 In general the query script works as:
 ```
-node query.js <identity-to-use> <args>...
+node query.js <identity-to-use> <channel-name> <chaincode-id> <args>...
 ```
 1. To invoke a transaction:
 ```
@@ -184,7 +182,7 @@ Transaction has been submitted, result is:
 ```
 In general the invoke script works as:
 ```
-node invoke.js <identity-to-use> <args>...
+node invoke.js <identity-to-use> <channel-name> <chaincode-id> <args>...
 ```
 
 ## Teardown the network
