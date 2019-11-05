@@ -10,8 +10,8 @@ one orderer, and one fabric-ca in the network.
 locations relative to location within docker image
 - [orderer.yaml](orderer.yaml) : Orderer configuration
 - [crypto-config.yaml](crypto-config.yaml) : File used with cryptogen to generate
-certs for specified number of orgs, peers, users, and orderer. Output CAs can be
-used to start instances of fabric-ca
+certs for specified number of orgs, peers, users, and orderer. The CA credentials
+can be used to start instances of fabric-ca
 - [configtx.yaml](configtx.yaml)  : File used with configtxgen to generate the
 genesis block which is used as the basis of the specified channel
 - [docker-compose.yml](docker-compose.yml) : Configuration of the fabric network
@@ -27,10 +27,11 @@ cryptogen are required to use the configurations above.**
 ./scripts/bootstrap.sh
 ```
 1. Build the peer image by running the following in the root of this repository.
-The [Dockerfile](../Dockerfile) is in the root of the repository. This step
-assumes you have already build the [fabric-private-chaincode base image](../utils/docker/base/Dockerfile).
-This will create the modified peer image as well as make the plugins necessary
-to start the peer.
+The [Dockerfile](../../Dockerfile) is in the root of the repository. This step
+assumes you have already build the [fabric-private-chaincode base image](../docker/base/Dockerfile).
+Take a look at building the docker dev environment in the main [README](../../README.md#docker).
+After you have create the base, run the following to create a modified peer
+image and the plugins necessary to start the peer.
 ```
 docker build -t hyperledger/fabric-peer-fpc .
 ```
@@ -53,7 +54,7 @@ docker-compose to start the network as well as starting the channel `mychannel`.
 ./start.sh
 ```
 
-## Deploying you FPC Chaincode
+## Deploying your FPC Chaincode
 The examples directory has been mounted into the peer container for convenience,
 under `/opt/examples`. All of these steps should be done within the peer container.
 
@@ -113,6 +114,78 @@ The response should look like the following:
 asset1:100
 ```
 
+## Create a User with Fabric-CA
+1. Ensure you have all the node modueles
+```
+npm Install
+```
+
+1. Enter into the `node-sdk` directory, to use the node sdk scripts to create
+new users.
+```
+cd node-sdk
+```
+
+1. Enroll as the admin download the admin credentials
+```
+node enrollAdmin.js
+```
+After running this, the directory `wallet/admin` should have been created and
+have public and private key pair. **NOTE** These credentials are not an admin in
+the network, but just the admin for Fabric-CA and have the ability to register
+more users.
+
+1. Register another user and download the credentials.
+```
+node registerUser.js <username>
+```
+After running this with your desired username, the directory `wallet/<username>`
+should have been created and have the public and private key pair.
+
+## Interact with the Hello World Chaincode
+**NOTE** Currently the invoke and query script assumes your chaincode is named
+`helloworld_test` and it has been instantiated on `mychannel`.
+
+1. Ensure you have all the node modueles
+```
+npm Install
+```
+
+1. Query the asset you stored previously
+```
+node query.js <username> retrieveAsset asset1
+```
+The response should look similar to what you saw above when you queried using
+the peer cli.
+```
+Transaction has been submitted, result is:
+{
+      "ResponseData":"YXNzZXQxOjEwMA==",
+      "Signature":<signature>,
+      "PublicKey":<public-key>
+}
+```
+In general the query script works as:
+```
+node query.js <identity-to-use> <args>...
+```
+1. To invoke a transaction:
+```
+node invoke.js <username> storeAsset asset2 200
+```
+The response should look like the following:
+```
+Transaction has been submitted, result is:
+{
+      "ResponseData":"T0s=",
+      "Signature":<signature>,
+      "PublicKey":<public-key>
+}
+```
+In general the invoke script works as:
+```
+node invoke.js <identity-to-use> <args>...
+```
 
 ## Teardown the network
 

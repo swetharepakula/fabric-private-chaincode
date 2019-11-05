@@ -19,7 +19,7 @@ if [ "$?" -ne 0 ]; then
   exit 1
 fi
 
-# mv crypto-config/peerOrganizations/org1.example.com/ca/*_sk crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com_sk
+mv crypto-config/peerOrganizations/org1.example.com/ca/*_sk crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com_sk
 
 # we only want to 
 #generate channel configuration transaction

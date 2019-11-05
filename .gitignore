@@ -7,3 +7,5 @@ cscope.out
 utils/docker-compose/bin/
 utils/docker-compose/crypto-config/
 utils/docker-compose/config/
+utils/docker-compose/node-sdk/node_modules
+utils/docker-compose/node-sdk/wallet
