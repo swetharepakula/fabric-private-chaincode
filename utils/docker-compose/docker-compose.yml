@@ -85,6 +85,7 @@ services:
         - ./crypto-config/peerOrganizations/org1.example.com/users:/etc/hyperledger/msp/users
         - ./config:/etc/hyperledger/configtx
         - ./core.yaml:/etc/hyperledger/fabric/core.yaml
+        - ../../examples:/project/src/github.com/hyperledger-labs/fabric-private-chaincode/examples
     depends_on:
       - orderer.example.com
     networks:

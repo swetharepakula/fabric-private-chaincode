@@ -26,13 +26,15 @@ cryptogen are required to use the configurations above.**
 ```
 ./scripts/bootstrap.sh
 ```
-1. Build the peer image by running the following in the root of this repository.
-The [Dockerfile](../../Dockerfile) is in the root of the repository. This step
+1. Build the peer image in `utils/docker/peer` directory.
+The [Dockerfile](../docker/peer/Dockerfile) is in the root of the repository. This step
 assumes you have already build the [fabric-private-chaincode base image](../docker/base/Dockerfile).
 Take a look at building the docker dev environment in the main [README](../../README.md#docker).
 After you have created the base image, run the following to create a modified
-peer image and the plugins necessary to start the peer.
+peer image and the plugins necessary to start the peer.  `$FPC_PATH` is the
+location of the entire fabric-private-chaincode repository.
 ```
+cd $FPC_PATH/utils/docker/peer
 docker build -t hyperledger/fabric-peer-fpc .
 ```
 2. Generate the cryptographic material needed for the network by running the
@@ -46,6 +48,7 @@ FPC network as specified in the docker-compose file. **This script is not
 idempotent and will delete the contents of `crypto-config` & `config` when run
 to ensure a clean start.**
 ```
+cd $FPC_PATH/utils/docker-compose
 ./generate.sh
 ```
 3. Start the network. Run the [start](start.sh) script. This will use

@@ -11,8 +11,8 @@ ARG SGXSSL=v2.4.1
 ARG NANOPB_VERSION=0.3.9.2
 ARG FABRIC_REPO=https://github.com/hyperledger/fabric.git
 ARG FABRIC_VERSION=v1.4.3
-ARG FPC_REPO=https://github.com/hyperledger-labs/fabric-private-chaincode
-ARG FPC_VERSION=master
+ARG FPC_REPO=https://github.com/swetharepakula/fabric-private-chaincode
+ARG FPC_VERSION=fpc-docker-compose
 
 ARG APT_ADD_PKGS=
 
@@ -54,12 +54,6 @@ RUN git clone https://github.com/nanopb/nanopb.git $NANOPB_PATH \
  && cd generator/proto \
  && make
 
-# Get FPC
-ENV FPC_PATH=$GOPATH/src/github.com/hyperledger-labs/fabric-private-chaincode
-# Note: could add --single-branch to below to speed-up and keep size smaller. But for now for a dev-image better keep complete repo
-# RUN git clone --branch $FPC_VERSION $FPC_REPO $FPC_PATH
-COPY /Users/Repakula/go/src/github.com/hyperledger-labs/fabric-private-chaincode $FPC_PATH
-
 # Get Fabric (after FPC as we need the FPC patches!)
 ENV FABRIC_PATH=$GOPATH/src/github.com/hyperledger/fabric
 # Note: could add --single-branch to below to speed-up and keep size smaller. But for now for a dev-image better keep complete repo
@@ -67,28 +61,35 @@ ENV FABRIC_PATH=$GOPATH/src/github.com/hyperledger/fabric
 #   To not commit an id, just do it only temporarily and only locally ...
 RUN git clone --branch $FABRIC_VERSION $FABRIC_REPO $FABRIC_PATH \
  && cd $FABRIC_PATH \
- && git config user.email "FPC" \
+ && git config user.email "FPC"
+
+# Get FPC
+ENV FPC_PATH=$GOPATH/src/github.com/hyperledger-labs/fabric-private-chaincode
+# Note: could add --single-branch to below to speed-up and keep size smaller. But for now for a dev-image better keep complete repo
+RUN git clone --branch $FPC_VERSION $FPC_REPO $FPC_PATH
+# COPY ./ /project/src/github.com/hyperledger-labs/fabric-private-chaincode
+
+RUN cd $FABRIC_PATH \ 
  && git am $FPC_PATH/fabric/*patch \
  && git config --unset user.email \
- && GO_TAGS=pluginsenabled make peer orderer cryptogen configtxgen
+ && GO_TAGS=pluginsenabled make peer
 
-# RUN cd $FPC_PATH/ecc \
-#  && make
+# Git repos needed to build plugins
+RUN go get github.com/golang/protobuf/proto
 
-# RUN cd $FPC_PATH/ecc_enclave \
-#  && make
+RUN go get github.com/pkg/errors
 
-# RUN cd $FPC_PATH/ercc \
-#  && make
+RUN go get golang.org/x/tools/cmd/goimports
 
-# RUN cd $FPC_PATH/tlcc \
-#  && make
-
-# RUN cd $FPC_PATH/tlcc_enclave \
-#  && make
+RUN go get golang.org/x/sync/semaphore
 
 RUN cd $FPC_PATH \
  && make plugins
 
+RUN cd $FPC_PATH/utils/fabric \
+ && make
+# RUN apt-get install libtool
+
 ENV FABRIC_BIN_DIR=$FABRIC_PATH/.build/bin
-CMD [$FABRIC_BIN_DIR/peer node start]
+ENV FPC_CMDS=/project/src/github.com/hyperledger-labs/fabric-private-chaincode/fabric/bin
+CMD [$FPC_CMDS/peer.sh node start]
