@@ -7,7 +7,7 @@ TOP = .
 include $(TOP)/build.mk
 
 SUB_DIRS = utils ercc ecc_enclave ecc tlcc_enclave tlcc examples integration # docs
-PLUGINS = ercc ecc_enclave ercc tlcc tlcc_enclave
+PLUGINS = ercc ecc_enclave ecc tlcc_enclave tlcc
 
 build : godeps
 
