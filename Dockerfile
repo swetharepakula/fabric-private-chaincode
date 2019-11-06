@@ -80,6 +80,10 @@ RUN go get github.com/golang/protobuf/proto
 
 RUN go get github.com/pkg/errors
 
+RUN go get golang.org/x/tools/cmd/goimports
+
+RUN go get golang.org/x/sync/semaphore
+
 RUN cd $FPC_PATH \
  && make plugins
 
