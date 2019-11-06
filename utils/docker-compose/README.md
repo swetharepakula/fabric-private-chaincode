@@ -30,12 +30,12 @@ cryptogen are required to use the configurations above.**
 The [Dockerfile](../../Dockerfile) is in the root of the repository. This step
 assumes you have already build the [fabric-private-chaincode base image](../docker/base/Dockerfile).
 Take a look at building the docker dev environment in the main [README](../../README.md#docker).
-After you have create the base, run the following to create a modified peer
-image and the plugins necessary to start the peer.
+After you have created the base image, run the following to create a modified
+peer image and the plugins necessary to start the peer.
 ```
 docker build -t hyperledger/fabric-peer-fpc .
 ```
-1. Generate the cryptographic material needed for the network by running the
+2. Generate the cryptographic material needed for the network by running the
 [generate](generate.sh) script. Cryptogen will be used to generate all the
 credentials needed based on the configuration filesabove and place them in the
 `crypto-config` directory.  Configtxgen will be used to create the genesis block
@@ -48,7 +48,7 @@ to ensure a clean start.**
 ```
 ./generate.sh
 ```
-1. Start the network. Run the [start](start.sh) script. This will use
+3. Start the network. Run the [start](start.sh) script. This will use
 docker-compose to start the network as well as starting the channel `mychannel`.
 ```
 ./start.sh
@@ -63,28 +63,28 @@ under `/opt/examples`. All of these steps should be done within the peer contain
 docker exec -it peer0.org1.example.com bash
 ```
 
-1. Follow the [steps](../../examples/README.md) in the tutorial to build your
+2. Follow the [steps](../../examples/README.md) in the tutorial to build your
 chaincode within the peer container. Do not continue to the testing step.
 
-1. Set up the peer command environment variable for convenience. `$FPC_CMDS` is
+3. Set up the peer command environment variable for convenience. `$FPC_CMDS` is
 already defined in the container.
 ```
 export PEER_CMD=$FPC_CMDS/peer.sh
 ```
 
-1. Set environment variable to use the admin credentials and set the
+4. Set environment variable to use the admin credentials and set the
 orderer address.
 ```
 export CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp
 export ORDERER_ADDR=orderer.example.com:7050
 ```
 
-1. Install your chaincode
+5. Install your chaincode
 ```
 ${PEER_CMD} chaincode install -l fpc-c -n helloworld_test -v 0 -p examples/helloworld/_build/lib
 ```
 
-1. Instantiate your chaincode
+6. Instantiate your chaincode
 ```
 ${PEER_CMD} chaincode instantiate -o orderer.example.com:7050 -C mychannel -n helloworld_test -v 0 -c '{"Args":["init"]}' -V ecc-vscc
 ```
@@ -95,7 +95,7 @@ ${PEER_CMD} chaincode instantiate -o orderer.example.com:7050 -C mychannel -n he
 ${PEER_CMD} chaincode invoke -C mychannel -n helloworld_test -c '{"Args":["storeAsset","asset1","100"]}'
 ```
 
-1. Retrieve the current value of asset1.
+2. Retrieve the current value of asset1.
 ```
 ${PEER_CMD} chaincode query -C mychannel -n helloworld_test -c '{"Args":["retrieveAsset","asset1"]}'
 ```
@@ -108,25 +108,25 @@ The response should look like the following:
 }
 ```
 
-1. Verify the encrypted response data shows that asset1 is equal to a hundred.
+3. Verify the encrypted response data shows that asset1 is equal to a hundred.
 ```
 > echo "YXNzZXQxOjEwMA==" | base64 -d
 asset1:100
 ```
 
 ## Create a User with Fabric-CA
-1. Ensure you have all the node modules
+4. Ensure you have all the node modules
 ```
 npm install
 ```
 
-1. Enter into the `node-sdk` directory, to use the node sdk scripts to create
+5. Enter into the `node-sdk` directory, to use the node sdk scripts to create
 new users.
 ```
 cd node-sdk
 ```
 
-1. Enroll as the admin download the admin credentials
+6. Enroll as the admin download the admin credentials
 ```
 node enrollAdmin.js
 ```
@@ -135,7 +135,7 @@ have public and private key pair. **NOTE** These credentials are not an admin in
 the network, but just the admin for Fabric-CA and have the ability to register
 more users.
 
-1. Register another user and download the credentials.
+7. Register another user and download the credentials.
 ```
 node registerUser.js <username>
 ```
@@ -149,7 +149,7 @@ should have been created and have the public and private key pair.
 npm install
 ```
 
-1. Query the asset you stored previously
+2. Query the asset you stored previously
 ```
 node query.js <username> mychannel helloworld_test retrieveAsset asset1
 ```
@@ -167,9 +167,9 @@ In general the query script works as:
 ```
 node query.js <identity-to-use> <channel-name> <chaincode-id> <args>...
 ```
-1. To invoke a transaction:
+3. To invoke a transaction:
 ```
-node invoke.js <username> storeAsset asset2 200
+node invoke.js <username> mychannel helloworld_test storeAsset asset2 200
 ```
 The response should look like the following:
 ```
@@ -197,3 +197,5 @@ remove all your containers and prune all excess volumes.
 - The current FPC dev image + peer is quite large
 - Making the plugin build simpler. One step I have already done is making a
 separate make target for the plugins.
+- currently this branch took out some of the checks in `peer.sh` to avoid
+needing unnecessary binaries in the peer image.
