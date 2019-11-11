@@ -13,7 +13,7 @@ export COMPOSE_PROJECT_NAME=fabric101
 
 docker-compose -f docker-compose.yml down
 
-docker-compose -f docker-compose.yml up -d orderer.example.com peer0.org1.example.com cli ca.example.com
+docker-compose -f docker-compose.yml up -d orderer.example.com peer0.org1.example.com ca.example.com
 docker ps -a
 
 # wait for Hyperledger Fabric to start
