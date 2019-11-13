@@ -6,16 +6,23 @@ used to interact with the network. Currently, there is two orgs, one peer,
 one orderer, and one fabric-ca in the network.
 
 ## Configuration
-- [core.yaml](core.yaml) : Peer configuration that has the SGX plugins and
-locations relative to location within docker image
-- [orderer.yaml](orderer.yaml) : Orderer configuration
-- [crypto-config.yaml](crypto-config.yaml) : File used with cryptogen to generate
+- [core-fpc.yaml](network-config/core-fpc.yaml) : Peer configuration that has
+the SGX plugins and locations relative to location within docker image
+- [core.yaml](network-config/core.yaml) : Regular Peer configuration
+without FPC. Used if `$USE_FPC` is set `false`.
+- [orderer.yaml](network-config/orderer.yaml) : Orderer configuration
+- [crypto-config.yaml](network-config/crypto-config.yaml) : File used with cryptogen to generate
 certs for specified number of orgs, peers, users, and orderer. The CA credentials
 can be used to start instances of fabric-ca
-- [configtx.yaml](configtx.yaml)  : File used with configtxgen to generate the
+- [configtx.yaml](network-config/configtx.yaml)  : File used with configtxgen to generate the
 genesis block which is used as the basis of the specified channel
-- [docker-compose.yml](docker-compose.yml) : Configuration of the fabric network
-to be used with `docker-compose`. **Docker version 17.06.2-ce is needed**
+- [docker-compose.yml](network-config/docker-compose.yml) : Configuration of the
+fabric network to be used with `docker-compose`. This file depends on two
+environment variables to properly bring up a network. `$FPC_CFG` can be set to
+`-fpc` or shall be empty. If set to `-fpc` the `core-fpc.yaml` & FPC peer image
+is used. Otherwise it will use `core.yaml` and the regular peer image.
+`$PEER_CMD` must also be set to the location of binary or script that will start
+ the peer.  **Docker version 17.06.2-ce or higher is needed**
 
 ## Steps
 1. Download the necessary fabric binaries. Run the
@@ -38,23 +45,26 @@ cd $FPC_PATH/utils/docker/peer
 docker build -t hyperledger/fabric-peer-fpc .
 ```
 2. Generate the cryptographic material needed for the network by running the
-[generate](generate.sh) script. Cryptogen will be used to generate all the
+[generate](scripts/generate.sh) script. Cryptogen will be used to generate all the
 credentials needed based on the configuration filesabove and place them in the
-`crypto-config` directory.  Configtxgen will be used to create the genesis block
-which is used to start up the orderer as well as the peer create channel
-configuration transaction. These will be placed in the `config` directory. The
-`crypto-config` & `config` directory will be mounted into every container of the
-FPC network as specified in the docker-compose file. **This script is not
+`network-config/crypto-config` directory.  Configtxgen will be used to create
+the genesis block which is used to start up the orderer as well as the peer
+create channel configuration transaction. These will be placed in the
+`network-config/config` directory. The `crypto-config` & `config` directory will
+be mounted into every container of the FPC network as specified in the
+docker-compose file. **This script is not
 idempotent and will delete the contents of `crypto-config` & `config` when run
 to ensure a clean start.**
 ```
 cd $FPC_PATH/utils/docker-compose
-./generate.sh
+scripts/generate.sh
 ```
-3. Start the network. Run the [start](start.sh) script. This will use
+3. Start the network. Run the [start](scripts/start.sh) script. This will use
 docker-compose to start the network as well as starting the channel `mychannel`.
+By default, this script will use FPC peers. If non FPC peers are desired, set
+`$USE_FPC` to `false`.
 ```
-./start.sh
+.scripts/start.sh
 ```
 
 ## Deploying your FPC Chaincode
@@ -190,15 +200,8 @@ node invoke.js <identity-to-use> <channel-name> <chaincode-id> <args>...
 
 ## Teardown the network
 
-1. Run the [teardown script](./teardown.sh) to clean up your environment. Run this in the root of this repo. **NOTE** This will try to
-remove all your containers and prune all excess volumes.
+1. Run the [teardown script](./teardown.sh) to clean up your environment. Run
+this in the root of this repo. **NOTE** This will try to remove all your
+containers and prune all excess volumes.
 ```
-./teardown.sh
-```
-
-## Places for Improvements
-- The current FPC dev image + peer is quite large
-- Making the plugin build simpler. One step I have already done is making a
-separate make target for the plugins.
-- currently this branch took out some of the checks in `peer.sh` to avoid
-needing unnecessary binaries in the peer image.
+.scripts/teardown.sh

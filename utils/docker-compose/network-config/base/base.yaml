@@ -17,7 +17,7 @@ services:
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - DOCKER_HOST=unix:///host/var/run/docker.sock
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
-    command: /project/src/github.com/hyperledger-labs/fabric-private-chaincode/fabric/bin/peer.sh node start
+    command: ${PEER_CMD} node start
     volumes:
         - /var/run/:/host/var/run/
         - ../config:/etc/hyperledger/configtx
