@@ -24,7 +24,7 @@ fi
 
 docker-compose -f ${NETWORK_CONFIG}/docker-compose.yml down
 
-docker-compose -f ${NETWORK_CONFIG}/docker-compose.yml up -d orderer.example.com peer0.org1.example.com ca.example.com
+docker-compose -f ${NETWORK_CONFIG}/docker-compose.yml up -d orderer.example.com peer0.org1.example.com peer0.org2.example.com peer0.org3.example.com peer0.org4.example.com ca.org1.example.com ca.org2.example.com ca.org3.example.com ca.org4.example.com
 docker ps -a
 
 # wait for Hyperledger Fabric to start
@@ -34,5 +34,8 @@ sleep ${FABRIC_START_TIMEOUT}
 
 # Create the channel
 docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com ${PEER_CMD} channel create -o orderer.example.com:7050 -c mychannel -f /etc/hyperledger/configtx/channel.tx
-# Join peer0.org1.example.com to the channel.
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com ${PEER_CMD} channel join -b mychannel.block
+
+for i in {1..4}; do 
+  # Join peers to the channel.
+  docker exec -e "CORE_PEER_LOCALMSPID=Org${i}MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org${i}.example.com/msp" peer0.org${i}.example.com ${PEER_CMD} channel join -b mychannel.block
+done

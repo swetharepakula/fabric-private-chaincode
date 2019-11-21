@@ -19,3 +19,4 @@ JAVA ?= java
 PLANTUML_JAR ?= plantuml.jar
 PLANTUML_CMD ?= $(JAVA) -jar $(PLANTUML_JAR)
 PLANTUML_IMG_FORMAT ?= png # pdf / png / svg
+DOCKER_DEV_RUN_OPTS= -v /Users/Repakula/go/src/github.com/hyperledger-labs/fabric-private-chaincode:/project/src/github.com/hyperledger-labs/fabric-private-chaincode

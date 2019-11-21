@@ -20,18 +20,36 @@ if [ "$?" -ne 0 ]; then
   exit 1
 fi
 
-mv ${FABRIC_CFG_PATH}/crypto-config/peerOrganizations/org1.example.com/ca/*_sk ${FABRIC_CFG_PATH}/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com_sk
+for i in {1..4}; do 
+  mv ${FABRIC_CFG_PATH}/crypto-config/peerOrganizations/org${i}.example.com/ca/*_sk ${FABRIC_CFG_PATH}/crypto-config/peerOrganizations/org${i}.example.com/ca/ca.org${i}.example.com_sk
+done
 
-#generate channel configuration transaction
-configtxgen -profile OneOrgChannel -outputCreateChannelTx ${FABRIC_CFG_PATH}/config/channel.tx -channelID $CHANNEL_NAME
-if [ "$?" -ne 0 ]; then
-  echo "Failed to generate channel configuration transaction..."
-  exit 1
-fi
+if [[ $BASIC_NETWORK == true ]]; then
+  #generate channel configuration transaction
+  configtxgen -profile OneOrgChannel -outputCreateChannelTx ${FABRIC_CFG_PATH}/config/channel.tx -channelID $CHANNEL_NAME
+  if [ "$?" -ne 0 ]; then
+    echo "Failed to generate channel configuration transaction..."
+    exit 1
+  fi
 
-#generate genesis block for orderer
-configtxgen -profile OneOrgOrdererGenesis -outputBlock ${FABRIC_CFG_PATH}/config/genesis.block
-if [ "$?" -ne 0 ]; then
-  echo "Failed to generate orderer genesis block..."
-  exit 1
+  #generate genesis block for orderer
+  configtxgen -profile OneOrgOrdererGenesis -outputBlock ${FABRIC_CFG_PATH}/config/genesis.block
+  if [ "$?" -ne 0 ]; then
+    echo "Failed to generate orderer genesis block..."
+    exit 1
+  fi
+else
+  #generate channel configuration transaction
+  configtxgen -profile FourOrgChannel -outputCreateChannelTx ${FABRIC_CFG_PATH}/config/channel.tx -channelID $CHANNEL_NAME
+  if [ "$?" -ne 0 ]; then
+    echo "Failed to generate channel configuration transaction..."
+    exit 1
+  fi
+
+  #generate genesis block for orderer
+  configtxgen -profile FourOrgOrdererGenesis -outputBlock ${FABRIC_CFG_PATH}/config/genesis.block
+  if [ "$?" -ne 0 ]; then
+    echo "Failed to generate orderer genesis block..."
+    exit 1
+  fi
 fi
