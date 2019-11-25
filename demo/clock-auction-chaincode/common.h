@@ -8,3 +8,4 @@
 
 #include "shim.h"
 #include "logging.h"
+#include <string>

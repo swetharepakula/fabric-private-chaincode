@@ -6,17 +6,19 @@
 
 #pragma once
 
-#include <string>
+#include "common.h"
 #include "error-codes.h"
+#include "storage.h"
 
 namespace ClockAuction
 {
     class SpectrumAuction
     {
         private:
+            ClockAuction::Storage auctionStorage;
 
         public:
-            SpectrumAuction();
+            SpectrumAuction(shim_ctx_ptr_t ctx);
 
             int createAuction(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
             int getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);

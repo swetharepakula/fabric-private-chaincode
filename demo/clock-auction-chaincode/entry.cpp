@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "shim.h"
-#include "logging.h"
-#include <string>
+#include "common.h"
 #include "base64/base64.h"
 #include "json/parson.h"
 #include "dispatcher.h"
+
 int init(
     uint8_t* response,
     uint32_t max_response_len,
@@ -33,7 +32,7 @@ int invoke(
 
     get_func_and_params(functionName, functionParameters, ctx);
 
-    ClockAuction::Dispatcher(functionName, functionParameters, response, max_response_len, actual_response_len);
+    ClockAuction::Dispatcher(functionName, functionParameters, response, max_response_len, actual_response_len, ctx);
 
     if(*actual_response_len == 0)
     {

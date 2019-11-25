@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <string>
+#include "common.h"
 #include <vector>
 #include <map>
 #include "spectrum-auction.h"
@@ -22,7 +22,6 @@ namespace ClockAuction
 
             std::string responseString_;
 
-            //static std::map<std::string, spectrumAuctionFunctionP> fMap_;
             ClockAuction::SpectrumAuction spectrumAuction_;
             ClockAuction::ErrorReport errorReport_;
                         
@@ -32,7 +31,8 @@ namespace ClockAuction
                     const std::vector<std::string>& functionParameters,
                     uint8_t* response,
                     const uint32_t max_response_len,
-                    uint32_t* actual_response_len);
+                    uint32_t* actual_response_len,
+                    shim_ctx_ptr_t ctx);
 
     };
 }

@@ -9,7 +9,7 @@
 #include "spectrum-auction-message.h"
 #include "error-codes.h"
 
-ClockAuction::SpectrumAuction::SpectrumAuction()
+ClockAuction::SpectrumAuction::SpectrumAuction(shim_ctx_ptr_t ctx) : auctionStorage(ctx)
 {}
 
 int ClockAuction::SpectrumAuction::createAuction(const std::string& inputString,
@@ -17,7 +17,9 @@ int ClockAuction::SpectrumAuction::createAuction(const std::string& inputString,
 {
     ClockAuction::SpectrumAuctionMessage msg;
     int rc = 0;
-    std::string statusMessage("auction created");
+
+
+    std::string statusMessage("Auction created");
     unsigned int auctionId = 1;
     msg.toCreateAuctionJson(rc, statusMessage, auctionId);
     outputString = msg.getJsonString();
