@@ -7,9 +7,7 @@
 #pragma once
 
 #include <string>
-#include "error_codes.h"
-
-typedef int (*spectrumAuctionFunctionP)(std::string&);
+#include "error-codes.h"
 
 namespace ClockAuction
 {
@@ -19,6 +17,10 @@ namespace ClockAuction
 
         public:
             SpectrumAuction();
-            void getAuctionDetails(std::string& inputString, std::string& outputString, ErrorReport& er);
-    }
+
+            int createAuction(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
+            int getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
+    };
 }
+
+typedef int (ClockAuction::SpectrumAuction::*spectrumAuctionFunctionP)(const std::string&, std::string&, ClockAuction::ErrorReport&);

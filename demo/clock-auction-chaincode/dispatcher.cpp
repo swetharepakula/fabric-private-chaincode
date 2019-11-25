@@ -4,38 +4,63 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "common.h"
 #include <string>
-#include "error_codes.h"
+#include "dispatcher.h"
+#include "error-codes.h"
+#include "spectrum-auction.h"
 
-ClockAuction::Dispatcher::Dispatcher(const std::string& functionName, const std::vector<std::string>& functionParameters, const uint8_t* response, const uint32_t& max_response_len, const uint32_t* actual_response_len): functionName_(functionName), functionParameters_(functionParameters), response_(response), max_response_len_(max_response_len) 
+ClockAuction::Dispatcher::Dispatcher(const std::string& functionName,
+        const std::vector<std::string>& functionParameters,
+        uint8_t* response,
+        const uint32_t max_response_len,
+        uint32_t* actual_response_len)
+    :
+        functionName_(functionName),
+        functionParameters_(functionParameters),
+        response_(response),
+        max_response_len_(max_response_len),
+        actual_response_len_(actual_response_len) 
 {
-    fMap_ = 
-    {
-        //{"createAuction", &spectrumAuction_.createAuction},
-        {"getAuctionDetails", &spectrumAuction_.getAuctionDetails}
-    };
+    //fMap_ = 
+    //{
+    //    //{"createAuction", &spectrumAuction_.createAuction},
+    //    {"getAuctionDetails", &SpectrumAuction::getAuctionDetails}
+    //};
+    std::map<std::string, spectrumAuctionFunctionP> fMap_;
+    //fMap_["getAuctionDetails"] = ClockAuction::SpectrumAuction::getAuctionDetails;
+    fMap_.emplace(std::make_pair("createAuction", &ClockAuction::SpectrumAuction::createAuction));
+    //fMap_.insert(std::make_pair("getAuctionDetails", &ClockAuction::SpectrumAuction::getAuctionDetails));
 
+
+    LOG_DEBUG("Try dispatch function %s with parameters %s", functionName_.c_str(), functionParameters[0].c_str());
 
     // Call auction function
-    auto fIter = fMap.find(functionName_);
-    if (fIter == m.end())
+    auto fIter = fMap_.find(functionName_);
+    if (fIter == fMap_.end())
     {
         // No such function
-        errorReport.set(EC_BAD_FUNCTION_NAME, "function not available");
+        LOG_ERROR("Auction API not found");
+        std::string badFunctionString("function not available");
+        errorReport_.set(EC_BAD_FUNCTION_NAME, badFunctionString);
     }
     else
     {
-        (*fIter->second)(functionParameters[0], responseString_, errorReport_);
+        LOG_DEBUG("Auction API found, call it");
+        (spectrumAuction_.*(fIter->second))(functionParameters[0], responseString_, errorReport_);
+        LOG_DEBUG("API response string: %s", responseString_.c_str());
     }
 
     // Write response string
-    if(responseString.length() > max_response_len_)
+    if(responseString_.length() > max_response_len_)
     {
+        LOG_ERROR("Response string too long to be output");
         *actual_response_len_ = 0;
     }
     else 
     {
-        *actual_response_len_ = responseString.length();
-        memcpy(response_, responseString.c_str(), *actual_response_len_);
+        *actual_response_len_ = responseString_.length();
+        memcpy(response_, responseString_.c_str(), *actual_response_len_);
     }
+    LOG_DEBUG("Response written (length %u)", *actual_response_len_);
 }

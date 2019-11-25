@@ -9,7 +9,7 @@
 #include <string>
 #include "base64/base64.h"
 #include "json/parson.h"
-
+#include "dispatcher.h"
 int init(
     uint8_t* response,
     uint32_t max_response_len,
