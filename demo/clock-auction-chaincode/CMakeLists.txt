@@ -12,6 +12,8 @@ set(SOURCE_FILES
     spectrum-auction.cpp
     spectrum-auction-message.cpp
     storage.cpp
+    principal.cpp
+    territory.cpp
     )
 
 include(../../ecc_enclave/enclave/CMakeLists-common-app-enclave.txt)

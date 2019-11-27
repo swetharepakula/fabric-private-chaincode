@@ -10,7 +10,7 @@
 ClockAuction::ErrorReport::ErrorReport()
 {}
 
-void ClockAuction::ErrorReport::set(error_codes_e e, std::string& s)
+void ClockAuction::ErrorReport::set(error_codes_e e, const std::string& s)
 {
     ec_ = e;
     errorString_ = s;

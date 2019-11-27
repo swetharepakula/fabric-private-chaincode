@@ -9,3 +9,5 @@
 #include "shim.h"
 #include "logging.h"
 #include <string>
+#include <vector>
+#include "json/parson.h"

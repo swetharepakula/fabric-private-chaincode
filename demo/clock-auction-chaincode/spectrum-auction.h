@@ -15,7 +15,11 @@ namespace ClockAuction
     class SpectrumAuction
     {
         private:
-            ClockAuction::Storage auctionStorage;
+            ClockAuction::Storage auctionStorage_;
+            uint32_t auctionIdCounter_;
+
+            void InitializeAuctionIdCounter();
+            void StoreAuctionIdCounter();
 
         public:
             SpectrumAuction(shim_ctx_ptr_t ctx);
