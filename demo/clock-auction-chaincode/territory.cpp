@@ -12,13 +12,20 @@ ClockAuction::Channel::Channel()
 ClockAuction::Channel::Channel(uint32_t id, std::string& name, uint32_t impairment) : id_(id), name_(name), impairment_(impairment)
 {}
 
+bool ClockAuction::Channel::toJsonObject(JSON_Object* root_object)
+{
+    json_object_set_number(root_object, "id", id_);
+    json_object_set_string(root_object, "name", name_.c_str());
+    json_object_set_number(root_object, "impairment", impairment_);
+
+    return true;
+}
+
 bool ClockAuction::Channel::toJson(std::string& jsonString)
 {
     JSON_Value* root_value = json_value_init_object();
     JSON_Object* root_object = json_value_get_object(root_value);
-    json_object_set_number(root_object, "id", id_);
-    json_object_set_string(root_object, "name", name_.c_str());
-    json_object_set_number(root_object, "impairment", impairment_);
+    bool b = toJsonObject(root_object);
 
     char* serialized_string = json_serialize_to_string(root_value);
     jsonString.assign(serialized_string);
@@ -27,10 +34,8 @@ bool ClockAuction::Channel::toJson(std::string& jsonString)
     return true;
 }
 
-bool ClockAuction::Channel::fromJson(const std::string& jsonString)
+bool ClockAuction::Channel::fromJsonObject(const JSON_Object* root_object)
 {
-    JSON_Value* root_value = json_parse_string(jsonString.c_str());
-    JSON_Object* root_object = json_value_get_object(root_value);
     {
         id_ = json_object_get_number(root_object, "id");
         if(id_ == 0)
@@ -56,8 +61,16 @@ bool ClockAuction::Channel::fromJson(const std::string& jsonString)
             return false;
         }
     }
-    json_value_free(root_value);
     return true;
+}
+
+bool ClockAuction::Channel::fromJson(const std::string& jsonString)
+{
+    JSON_Value* root_value = json_parse_string(jsonString.c_str());
+    JSON_Object* root_object = json_value_get_object(root_value);
+    bool b = fromJsonObject(root_object);
+    json_value_free(root_value);
+    return b;
 }
 
 ClockAuction::Territory::Territory()

@@ -23,7 +23,9 @@ namespace ClockAuction
         public:
             Channel();
             Channel(uint32_t id, std::string& name, uint32_t impairment);
+            bool toJsonObject(JSON_Object* root_object);
             bool toJson(std::string& jsonString);
+            bool fromJsonObject(const JSON_Object* root_object);
             bool fromJson(const std::string& jsonString);
     };
 

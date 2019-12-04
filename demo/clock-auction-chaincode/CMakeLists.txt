@@ -14,6 +14,7 @@ set(SOURCE_FILES
     storage.cpp
     principal.cpp
     territory.cpp
+    eligibility.cpp
     )
 
 include(../../ecc_enclave/enclave/CMakeLists-common-app-enclave.txt)
