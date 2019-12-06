@@ -9,6 +9,7 @@
 #include "common.h"
 #include "error-codes.h"
 #include "storage.h"
+#include "auction-state.h"
 
 namespace ClockAuction
 {
@@ -20,6 +21,9 @@ namespace ClockAuction
 
             void InitializeAuctionIdCounter();
             void StoreAuctionIdCounter();
+
+            StaticAuctionState staticAuctionState;
+            DynamicAuctionState dynamicAuctionState;
 
         public:
             SpectrumAuction(shim_ctx_ptr_t ctx);

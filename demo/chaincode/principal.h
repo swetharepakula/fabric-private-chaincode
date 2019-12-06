@@ -22,8 +22,10 @@ namespace ClockAuction
             ErrorReport er_;
 
         public:
-            Principal(uint32_t id, std::string& mspId, std::string& dn, std::string& name);
-            bool toJson(std::string& jsonString);
-            bool fromJson(std::string& jsonString);
+            //Principal(uint32_t id, std::string& mspId, std::string& dn, std::string& name);
+            //bool toJson(std::string& jsonString);
+            //bool fromJson(std::string& jsonString);
+            bool toJsonObject(JSON_Object* root_object);
+            bool fromJsonObject(const JSON_Object* root_object);
     };
 }

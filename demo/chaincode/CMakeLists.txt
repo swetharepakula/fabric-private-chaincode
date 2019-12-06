@@ -15,6 +15,8 @@ set(SOURCE_FILES
     principal.cpp
     territory.cpp
     eligibility.cpp
+    bidder.cpp
+    auction-state.cpp
     )
 
 include(../../ecc_enclave/enclave/CMakeLists-common-app-enclave.txt)

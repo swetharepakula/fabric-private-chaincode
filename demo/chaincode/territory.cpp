@@ -21,18 +21,18 @@ bool ClockAuction::Channel::toJsonObject(JSON_Object* root_object)
     return true;
 }
 
-bool ClockAuction::Channel::toJson(std::string& jsonString)
-{
-    JSON_Value* root_value = json_value_init_object();
-    JSON_Object* root_object = json_value_get_object(root_value);
-    bool b = toJsonObject(root_object);
-
-    char* serialized_string = json_serialize_to_string(root_value);
-    jsonString.assign(serialized_string);
-    json_free_serialized_string(serialized_string);
-    json_value_free(root_value);
-    return true;
-}
+//bool ClockAuction::Channel::toJson(std::string& jsonString)
+//{
+//    JSON_Value* root_value = json_value_init_object();
+//    JSON_Object* root_object = json_value_get_object(root_value);
+//    bool b = toJsonObject(root_object);
+//
+//    char* serialized_string = json_serialize_to_string(root_value);
+//    jsonString.assign(serialized_string);
+//    json_free_serialized_string(serialized_string);
+//    json_value_free(root_value);
+//    return true;
+//}
 
 bool ClockAuction::Channel::fromJsonObject(const JSON_Object* root_object)
 {
@@ -64,14 +64,14 @@ bool ClockAuction::Channel::fromJsonObject(const JSON_Object* root_object)
     return true;
 }
 
-bool ClockAuction::Channel::fromJson(const std::string& jsonString)
-{
-    JSON_Value* root_value = json_parse_string(jsonString.c_str());
-    JSON_Object* root_object = json_value_get_object(root_value);
-    bool b = fromJsonObject(root_object);
-    json_value_free(root_value);
-    return b;
-}
+//bool ClockAuction::Channel::fromJson(const std::string& jsonString)
+//{
+//    JSON_Value* root_value = json_parse_string(jsonString.c_str());
+//    JSON_Object* root_object = json_value_get_object(root_value);
+//    bool b = fromJsonObject(root_object);
+//    json_value_free(root_value);
+//    return b;
+//}
 
 ClockAuction::Territory::Territory()
 {}
@@ -79,10 +79,11 @@ ClockAuction::Territory::Territory()
 ClockAuction::Territory::Territory(uint32_t id, std::string& name, bool isHighDemand, double minPrice, std::vector<Channel>& channels) : id_(id), name_(name), isHighDemand_(isHighDemand), minPrice_(minPrice), channels_(channels)
 {}
 
-bool ClockAuction::Territory::toJson(std::string& jsonString)
+//bool ClockAuction::Territory::toJson(std::string& jsonString)
+bool ClockAuction::Territory::toJsonObject(JSON_Object* root_object)
 {
-    JSON_Value* root_value = json_value_init_object();
-    JSON_Object* root_object = json_value_get_object(root_value);
+    //JSON_Value* root_value = json_value_init_object();
+    //JSON_Object* root_object = json_value_get_object(root_value);
     json_object_set_number(root_object, "id", id_);
     json_object_set_string(root_object, "name", name_.c_str());
     json_object_set_boolean(root_object, "isHighDemand", isHighDemand_);
@@ -90,22 +91,23 @@ bool ClockAuction::Territory::toJson(std::string& jsonString)
     JSON_Array* channel_array = json_object_get_array(root_object, "channels");
     for(unsigned int i = 0; i < channels_.size(); i++)
     {
-        std::string channelJsonString;
-        channels_[i].toJson(channelJsonString);
-        json_array_append_string(channel_array, channelJsonString.c_str());
-        channelJsonString.clear();
+        JSON_Value* v = json_value_init_object();
+        JSON_Object* o = json_value_get_object(v);
+        channels_[i].toJsonObject(o);
+        json_array_append_value(channel_array, v);
     }
 
-    char* serialized_string = json_serialize_to_string(root_value);
-    jsonString.assign(serialized_string);
-    json_free_serialized_string(serialized_string);
-    json_value_free(root_value);
+    //char* serialized_string = json_serialize_to_string(root_value);
+    //jsonString.assign(serialized_string);
+    //json_free_serialized_string(serialized_string);
+    //json_value_free(root_value);
 }
 
-bool ClockAuction::Territory::fromJson(const std::string& jsonString)
+//bool ClockAuction::Territory::fromJson(const std::string& jsonString)
+bool ClockAuction::Territory::fromJsonObject(const JSON_Object* root_object)
 {
-    JSON_Value* root_value = json_parse_string(jsonString.c_str());
-    JSON_Object* root_object = json_value_get_object(root_value);
+    //JSON_Value* root_value = json_parse_string(jsonString.c_str());
+    //JSON_Object* root_object = json_value_get_object(root_value);
     {
         id_ = json_object_get_number(root_object, "id");
         if(id_ == 0)
@@ -142,14 +144,10 @@ bool ClockAuction::Territory::fromJson(const std::string& jsonString)
         unsigned int channelN = json_array_get_count(channel_array);
         for(unsigned int i = 0; i < channelN; i++)
         {
-            const char *s = json_array_get_string(channel_array, i);
-            if(s == 0)
-            {
-                er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-                return false;
-            }
+            //const char *s = json_array_get_string(channel_array, i);
+            JSON_Object* o = json_array_get_object(channel_array, i);
             Channel ch;
-            bool b = ch.fromJson(s);
+            bool b = ch.fromJsonObject(o);
             if(!b)
             {
                 er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
@@ -158,6 +156,6 @@ bool ClockAuction::Territory::fromJson(const std::string& jsonString)
             channels_.push_back(ch);
         }
     }
-    json_value_free(root_value);
+    //json_value_free(root_value);
     return true;
 }

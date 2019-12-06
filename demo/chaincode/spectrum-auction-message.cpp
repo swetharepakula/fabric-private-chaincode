@@ -13,6 +13,9 @@
 ClockAuction::SpectrumAuctionMessage::SpectrumAuctionMessage()
 {}
 
+ClockAuction::SpectrumAuctionMessage::SpectrumAuctionMessage(const std::string& message) : inputJsonString_(message)
+{}
+
 void ClockAuction::SpectrumAuctionMessage::toStatusJsonString(int rc, std::string& message, std::string& jsonString)
 {
     JSON_Value* root_value = json_value_init_object();
@@ -45,4 +48,14 @@ void ClockAuction::SpectrumAuctionMessage::toCreateAuctionJson(int rc, std::stri
     json_value_free(root_value);
 }
 
+bool ClockAuction::SpectrumAuctionMessage::fromCreateAuctionJson(StaticAuctionState& staticAuctionState)
+{
+    JSON_Value* root_value = json_parse_string(inputJsonString_.c_str());
+    JSON_Object* root_object = json_value_get_object(root_value);
+
+    bool b = staticAuctionState.fromJsonObject(root_object);
+
+    json_value_free(root_value);
+    return b;
+}
 
