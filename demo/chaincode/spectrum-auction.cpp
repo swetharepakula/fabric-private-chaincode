@@ -37,10 +37,18 @@ void ClockAuction::SpectrumAuction::StoreAuctionIdCounter()
     auctionStorage_.ledgerPrivatePutBinary(key, keyLength, value, valueLength);
 }
 
-int ClockAuction::SpectrumAuction::createAuction(const std::string& inputString,
+bool ClockAuction::SpectrumAuction::createAuction(const std::string& inputString,
         std::string& outputString, ClockAuction::ErrorReport& er)
 {
-    //TODO parse and validate input string
+    {   // parse and validate input string
+        ClockAuction::SpectrumAuctionMessage inMsg;
+        bool b = inMsg.fromCreateAuctionJson(staticAuctionState_);
+        if(!b)
+        {
+            er = staticAuctionState_.getErrorReport();
+            return false;
+        }
+    }
 
     //all check passed, install auction
 
@@ -49,13 +57,21 @@ int ClockAuction::SpectrumAuction::createAuction(const std::string& inputString,
     unsigned int auctionId = auctionIdCounter_++;
     StoreAuctionIdCounter();
 
+    // initialize dynamic state
+    dynamicAuctionState_ = DynamicAuctionState(CLOCK_PHASE, INITIAL_CLOCK_ROUND_NUMBER, false);
+
+    //store static state
+
+    //store dynamic state
+
     ClockAuction::SpectrumAuctionMessage msg;
     int rc = 0;
     std::string statusMessage("Auction created");
     msg.toCreateAuctionJson(rc, statusMessage, auctionId);
     outputString = msg.getJsonString();
+    return true;
 }
 
-int ClockAuction::SpectrumAuction::getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er)
+bool ClockAuction::SpectrumAuction::getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er)
 {
 }

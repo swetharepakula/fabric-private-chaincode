@@ -18,8 +18,11 @@ typedef enum
     STATE_UNDEFINED,
     CLOCK_PHASE,
     ASSIGNMENT_PHASE,
-    FSR_FAILED
+    FSR_FAILED,
+    MAX_STATE_INDEX
 } auction_state_e;
+
+#define INITIAL_CLOCK_ROUND_NUMBER 1
 
 namespace ClockAuction
 {
@@ -38,12 +41,22 @@ namespace ClockAuction
         public:
             bool toJsonObject(JSON_Object* root_object);
             bool fromJsonObject(const JSON_Object* root_object);
+            bool checkValidity();
+            ErrorReport getErrorReport();
     };
 
     class DynamicAuctionState
     {
-        auction_state_e auctionState_;
-        uint32_t clockRound_;
-        bool roundActive_;
+        private:
+            auction_state_e auctionState_;
+            uint32_t clockRound_;
+            bool roundActive_;
+            ErrorReport er_;
+            
+        public:
+            DynamicAuctionState();
+            DynamicAuctionState(auction_state_e auctionState, uint32_t clockRound, bool roundActive);
+            bool toJsonObject(JSON_Object* root_object);
+            bool fromJsonObject(const JSON_Object* root_object);
     };
 }

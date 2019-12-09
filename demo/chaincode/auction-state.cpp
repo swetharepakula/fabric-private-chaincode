@@ -132,3 +132,64 @@ bool ClockAuction::StaticAuctionState::fromJsonObject(const JSON_Object* root_ob
     }
     return true;
 }
+
+bool ClockAuction::StaticAuctionState::checkValidity()
+{
+    FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, name_.length() == 0);
+    FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, territories_.size() == 0);
+    FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, bidders_.size() == 0);
+    FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, initialEligibilities_.size() == 0);
+    FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, bidders_.size() != initialEligibilities_.size());
+    FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, activityRequirementPercentage_ >=0 && activityRequirementPercentage_ <= 100);
+    FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, clockPriceIncrementPercentage_ >=0 && clockPriceIncrementPercentage_ <= 100);
+    return true;
+}
+
+ClockAuction::ErrorReport ClockAuction::StaticAuctionState::getErrorReport()
+{
+    return er_;
+}
+
+ClockAuction::DynamicAuctionState::DynamicAuctionState() {}
+
+ClockAuction::DynamicAuctionState::DynamicAuctionState(auction_state_e auctionState, uint32_t clockRound, bool roundActive)
+: auctionState_(auctionState), clockRound_(clockRound), roundActive_(roundActive) {}
+
+bool ClockAuction::DynamicAuctionState::toJsonObject(JSON_Object* root_object)
+{
+    json_object_set_number(root_object, "state", auctionState_);
+    json_object_set_number(root_object, "clockRound", clockRound_);
+    json_object_set_boolean(root_object, "RoundActive", (int)roundActive_);
+    return true;
+}
+
+bool ClockAuction::DynamicAuctionState::fromJsonObject(const JSON_Object* root_object)
+{
+    {
+        double d = json_object_get_number(root_object, "state");
+        auctionState_ = (d >= 0 && d <= MAX_STATE_INDEX ? (auction_state_e) d : STATE_UNDEFINED);
+        if(auctionState_ == 0)
+        {
+            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
+            return false;
+        }
+    }
+    {
+        clockRound_ = json_object_get_number(root_object, "clockRound");
+        if(clockRound_ == 0)
+        {
+            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
+            return false;
+        }
+    }
+    {
+        roundActive_ = json_object_get_boolean(root_object, "roundActive");
+        if(roundActive_ == 0)
+        {
+            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
+            return false;
+        }
+    }
+    return true;
+}
+

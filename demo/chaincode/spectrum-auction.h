@@ -16,21 +16,20 @@ namespace ClockAuction
     class SpectrumAuction
     {
         private:
-            ClockAuction::Storage auctionStorage_;
             uint32_t auctionIdCounter_;
-
             void InitializeAuctionIdCounter();
             void StoreAuctionIdCounter();
 
-            StaticAuctionState staticAuctionState;
-            DynamicAuctionState dynamicAuctionState;
+            StaticAuctionState staticAuctionState_;
+            DynamicAuctionState dynamicAuctionState_;
+            ClockAuction::Storage auctionStorage_;
 
         public:
             SpectrumAuction(shim_ctx_ptr_t ctx);
 
-            int createAuction(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
-            int getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
+            bool createAuction(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
+            bool getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
     };
 }
 
-typedef int (ClockAuction::SpectrumAuction::*spectrumAuctionFunctionP)(const std::string&, std::string&, ClockAuction::ErrorReport&);
+typedef bool (ClockAuction::SpectrumAuction::*spectrumAuctionFunctionP)(const std::string&, std::string&, ClockAuction::ErrorReport&);

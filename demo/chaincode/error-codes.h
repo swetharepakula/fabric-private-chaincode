@@ -33,3 +33,11 @@ namespace ClockAuction
             void set(error_codes_e ec, const std::string& errorString);
     };
 }
+
+#define FAST_FAIL_CHECK(errorReport, code, b) {\
+    if(b)\
+    {\
+        errorReport.set(code, std::string(__FILE__) + ":" + std::to_string(__LINE__));\
+        return false;\
+    }\
+}
