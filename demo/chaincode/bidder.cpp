@@ -7,7 +7,7 @@
 #include "common.h"
 #include "bidder.h"
 
-bool ClockAuction::Bidder::toJsonObject(JSON_Object* root_object)
+bool ClockAuction::Bidder::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_number(root_object, "id", id_);
     json_object_set_string(root_object, "displayName", displayName_.c_str());

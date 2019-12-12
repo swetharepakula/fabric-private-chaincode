@@ -39,7 +39,7 @@ namespace ClockAuction
             ErrorReport er_;
             
         public:
-            bool toJsonObject(JSON_Object* root_object);
+            bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
             bool checkValidity();
             ErrorReport getErrorReport();
@@ -56,7 +56,7 @@ namespace ClockAuction
         public:
             DynamicAuctionState();
             DynamicAuctionState(auction_state_e auctionState, uint32_t clockRound, bool roundActive);
-            bool toJsonObject(JSON_Object* root_object);
+            bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
     };
 }

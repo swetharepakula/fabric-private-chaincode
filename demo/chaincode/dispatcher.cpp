@@ -35,9 +35,7 @@ ClockAuction::Dispatcher::Dispatcher(const std::string& functionName,
     if (fIter == fMap_.end())
     {
         // No such function
-        LOG_ERROR("Auction API not found");
-        std::string badFunctionString("function not available");
-        errorReport_.set(EC_BAD_FUNCTION_NAME, badFunctionString);
+        errorReport_.set(EC_BAD_FUNCTION_NAME, "Auction API not found");
     }
     else
     {
@@ -46,16 +44,24 @@ ClockAuction::Dispatcher::Dispatcher(const std::string& functionName,
         LOG_DEBUG("API response string: %s", responseString_.c_str());
     }
 
-    // Write response string
+    // prepare response string
+    if(responseString_.length() == 0 || !errorReport_.isSuccess())
+    {
+        // an error occurred: fill the response with the error/status message
+        errorReport_.toStatusJsonString(responseString_);
+        LOG_DEBUG("Error response string set: %s", responseString_.c_str());
+    }
+
     if(responseString_.length() > max_response_len_)
     {
         LOG_ERROR("Response string too long to be output");
-        *actual_response_len_ = 0;
+        errorReport_.set(EC_SHORT_RESPONSE_BUFFER, "Response string too long to be output");
+        errorReport_.toStatusJsonString(responseString_);
     }
-    else 
-    {
-        *actual_response_len_ = responseString_.length();
-        memcpy(response_, responseString_.c_str(), *actual_response_len_);
-    }
+
+    // write response string (if possible)
+    *actual_response_len_ = (responseString_.length() > max_response_len_ ? 0 : responseString_.length());
+    memcpy(response_, responseString_.c_str(), *actual_response_len_);
     LOG_DEBUG("Response written (length %u)", *actual_response_len_);
 }
+

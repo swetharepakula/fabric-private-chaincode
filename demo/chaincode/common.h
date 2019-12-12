@@ -6,6 +6,8 @@
 
 #pragma once
 
+#define DO_DEBUG true
+
 #include "shim.h"
 #include "logging.h"
 #include <string>

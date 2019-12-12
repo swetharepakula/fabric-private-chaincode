@@ -7,7 +7,7 @@
 #include "common.h"
 #include "auction-state.h"
 
-bool ClockAuction::StaticAuctionState::toJsonObject(JSON_Object* root_object)
+bool ClockAuction::StaticAuctionState::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_string(root_object, "name", name_.c_str());
     json_object_set_value(root_object, "territories", json_value_init_array());
@@ -42,93 +42,56 @@ bool ClockAuction::StaticAuctionState::toJsonObject(JSON_Object* root_object)
 
 bool ClockAuction::StaticAuctionState::fromJsonObject(const JSON_Object* root_object)
 {
+    FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, root_object == NULL);
+
     {
         const char* str = json_object_get_string(root_object, "name");
-        if(str == 0)
-        {
-            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-            return false;
-        }
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, str == 0);
         name_ = std::string(str);
     }
     {
         JSON_Array* territory_array = json_object_get_array(root_object, "territories");
-        if(territory_array == 0)
-        {
-            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-            return false;
-        }
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, territory_array == 0);
         unsigned int territoryN = json_array_get_count(territory_array);
         for(unsigned int i = 0; i < territoryN; i++)
         {
             JSON_Object* o = json_array_get_object(territory_array, i);
             Territory territory;
-            bool b = territory.fromJsonObject(o);
-            if(!b)
-            {
-                er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-                return false;
-            }
+            FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, territory.fromJsonObject(o));
             territories_.push_back(territory);
         }
     }
     {
         JSON_Array* bidder_array = json_object_get_array(root_object, "bidders");
-        if(bidder_array == 0)
-        {
-            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-            return false;
-        }
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, bidder_array == 0);
         unsigned int bidderN = json_array_get_count(bidder_array);
         for(unsigned int i = 0; i < bidderN; i++)
         {
             JSON_Object* o = json_array_get_object(bidder_array, i);
             Bidder bidder;
-            bool b = bidder.fromJsonObject(o);
-            if(!b)
-            {
-                er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-                return false;
-            }
+            FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, bidder.fromJsonObject(o));
             bidders_.push_back(bidder);
         }
     }
     {
         JSON_Array* eligibility_array = json_object_get_array(root_object, "initialEligibilities");
-        if(eligibility_array == 0)
-        {
-            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-            return false;
-        }
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, eligibility_array == 0);
         unsigned int eligibilityN = json_array_get_count(eligibility_array);
         for(unsigned int i = 0; i < eligibilityN; i++)
         {
             JSON_Object* o = json_array_get_object(eligibility_array, i);
             Eligibility eligibility;
-            bool b = eligibility.fromJsonObject(o);
-            if(!b)
-            {
-                er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-                return false;
-            }
+            FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, eligibility.fromJsonObject(o));
             initialEligibilities_.push_back(eligibility);
         }
     }
     {
         activityRequirementPercentage_ = json_object_get_number(root_object, "activityRequirementPercentage");
-        if(activityRequirementPercentage_ == 0)
-        {
-            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-            return false;
-        }
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, activityRequirementPercentage_ == 0);
     }
     {
         clockPriceIncrementPercentage_ = json_object_get_number(root_object, "clockPriceIncrementPercentage");
-        if(clockPriceIncrementPercentage_ == 0)
-        {
-            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-            return false;
-        }
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, clockPriceIncrementPercentage_ == 0);
     }
     return true;
 }
@@ -155,7 +118,7 @@ ClockAuction::DynamicAuctionState::DynamicAuctionState() {}
 ClockAuction::DynamicAuctionState::DynamicAuctionState(auction_state_e auctionState, uint32_t clockRound, bool roundActive)
 : auctionState_(auctionState), clockRound_(clockRound), roundActive_(roundActive) {}
 
-bool ClockAuction::DynamicAuctionState::toJsonObject(JSON_Object* root_object)
+bool ClockAuction::DynamicAuctionState::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_number(root_object, "state", auctionState_);
     json_object_set_number(root_object, "clockRound", clockRound_);

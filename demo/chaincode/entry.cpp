@@ -32,19 +32,26 @@ int invoke(
 
     get_func_and_params(functionName, functionParameters, ctx);
 
-    ClockAuction::Dispatcher(functionName, functionParameters, response, max_response_len, actual_response_len, ctx);
+    ClockAuction::Dispatcher auctionApiDispatcher(functionName, functionParameters, response, max_response_len, actual_response_len, ctx);
+    if(!auctionApiDispatcher.errorReport_.isSuccess())
+    {
+        LOG_ERROR("Execution failed.");
+        ret = -1;
+    }
+    else
+    {
+        LOG_DEBUG("Execution successful");
+        ret = 0;
+    }
 
+    // double check that the response has been filled
     if(*actual_response_len == 0)
     {
         LOG_ERROR("Response length is zero");
         ret = -1;
     }
-    else 
-    {
-        ret = 0;
-    }
 
     LOG_INFO("Clock Auction: exiting.");
-    return 0;
+    return ret;
 }
 

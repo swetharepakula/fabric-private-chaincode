@@ -22,15 +22,25 @@ namespace ClockAuction
             const std::string inputJsonString_;
             std::string jsonString_;
 
-            void toStatusJsonString(int rc, std::string& message, std::string& jsonString);
+            ErrorReport er_;
+
 
         public:
             SpectrumAuctionMessage();
             SpectrumAuctionMessage(const std::string& message);
+            ErrorReport getErrorReport();
 
             std::string getJsonString();
 
+            void toStatusJsonString(int rc, std::string& message, std::string& jsonString);
+
             void toCreateAuctionJson(int rc, std::string& message, unsigned int auctionId);
             bool fromCreateAuctionJson(StaticAuctionState& staticAuctionState);
+
+            void toStaticAuctionStateJson(const StaticAuctionState& staticAuctionState);
+            bool fromStaticAuctionStateJson(StaticAuctionState& staticAuctionState);
+
+            void toDynamicAuctionStateJson(const DynamicAuctionState& dynamicAuctionState);
+            bool fromDynamicAuctionStateJson(DynamicAuctionState& dynamicAuctionState);
     };
 }

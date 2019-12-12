@@ -11,7 +11,7 @@
 //    // TODO: change constructor to include a bidder-checking function
 //}
 
-bool ClockAuction::Eligibility::toJsonObject(JSON_Object* root_object)
+bool ClockAuction::Eligibility::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_number(root_object, "bidderId", bidderId_);
     json_object_set_number(root_object, "number", number_);

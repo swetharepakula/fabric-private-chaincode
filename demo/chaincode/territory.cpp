@@ -12,7 +12,7 @@ ClockAuction::Channel::Channel()
 ClockAuction::Channel::Channel(uint32_t id, std::string& name, uint32_t impairment) : id_(id), name_(name), impairment_(impairment)
 {}
 
-bool ClockAuction::Channel::toJsonObject(JSON_Object* root_object)
+bool ClockAuction::Channel::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_number(root_object, "id", id_);
     json_object_set_string(root_object, "name", name_.c_str());
@@ -80,7 +80,7 @@ ClockAuction::Territory::Territory(uint32_t id, std::string& name, bool isHighDe
 {}
 
 //bool ClockAuction::Territory::toJson(std::string& jsonString)
-bool ClockAuction::Territory::toJsonObject(JSON_Object* root_object)
+bool ClockAuction::Territory::toJsonObject(JSON_Object* root_object) const
 {
     //JSON_Value* root_value = json_value_init_object();
     //JSON_Object* root_object = json_value_get_object(root_value);

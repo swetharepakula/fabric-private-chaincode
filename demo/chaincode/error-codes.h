@@ -10,8 +10,8 @@
 
 typedef enum {
     EC_UNDEFINED,              // 0
-    EC_GENERIC_SUCCESS,        // 1
-    EC_GENERIC_ERROR,          // 2
+    EC_SUCCESS,                // 1
+    EC_ERROR,                  // 2
     EC_HIDDEN,                 // 3
     EC_BAD_FUNCTION_NAME,      // 4
     EC_INVALID_INPUT,          // 5
@@ -31,6 +31,8 @@ namespace ClockAuction
             ErrorReport();
 
             void set(error_codes_e ec, const std::string& errorString);
+            void toStatusJsonString(std::string& jsonString);
+            bool isSuccess();
     };
 }
 

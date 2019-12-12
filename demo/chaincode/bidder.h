@@ -20,7 +20,7 @@ namespace ClockAuction
             Principal principal_;
             ErrorReport er_;
         public:
-            bool toJsonObject(JSON_Object* root_object);
+            bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
     };
 }

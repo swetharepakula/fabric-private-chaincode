@@ -23,10 +23,10 @@ namespace ClockAuction
             std::string responseString_;
 
             ClockAuction::SpectrumAuction spectrumAuction_;
-            ClockAuction::ErrorReport errorReport_;
-                        
 
         public:
+            ClockAuction::ErrorReport errorReport_;
+
             Dispatcher(const std::string& functionName,
                     const std::vector<std::string>& functionParameters,
                     uint8_t* response,

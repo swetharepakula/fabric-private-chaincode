@@ -18,11 +18,13 @@ namespace ClockAuction
         private:
             uint32_t auctionIdCounter_;
             void InitializeAuctionIdCounter();
-            void StoreAuctionIdCounter();
+            void IncrementAndStoreAuctionIdCounter();
 
             StaticAuctionState staticAuctionState_;
             DynamicAuctionState dynamicAuctionState_;
             ClockAuction::Storage auctionStorage_;
+
+            void storeAuctionState();
 
         public:
             SpectrumAuction(shim_ctx_ptr_t ctx);
