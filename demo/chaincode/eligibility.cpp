@@ -22,19 +22,11 @@ bool ClockAuction::Eligibility::fromJsonObject(const JSON_Object* root_object)
 {
     {
         bidderId_ = json_object_get_number(root_object, "bidderId");
-        if(bidderId_ == 0)
-        {
-            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-            return false;
-        }
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, bidderId_ == 0);
     }
     {
         number_ = json_object_get_number(root_object, "number");
-        if(number_ == 0)
-        {
-            er_.set(EC_INVALID_INPUT, "line: " + std::to_string(__LINE__));
-            return false;
-        }
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, number_ == 0);
     }
     return true;
 }

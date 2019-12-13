@@ -36,10 +36,28 @@ namespace ClockAuction
     };
 }
 
+#define DEFAULT_ERROR_REPORT(er, code) er.set(code, std::string(__FILE__) + ":" + std::to_string(__LINE__));
+
 #define FAST_FAIL_CHECK(errorReport, code, b) {\
     if(b)\
     {\
-        errorReport.set(code, std::string(__FILE__) + ":" + std::to_string(__LINE__));\
+        DEFAULT_ERROR_REPORT(errorReport, code)\
         return false;\
     }\
 }
+
+#define FAST_FAIL_CHECK_EX(parentErrorReport, pChildErrorReport, code, b) {\
+    if(b)\
+    {\
+        if(pChildErrorReport)\
+        {\
+            parentErrorReport = *pChildErrorReport;\
+        }\
+        else\
+        {\
+            DEFAULT_ERROR_REPORT(parentErrorReport, code)\
+        }\
+        return false;\
+    }\
+}
+

@@ -9,6 +9,7 @@
 #include "error-codes.h"
 #include "common.h"
 #include "auction-state.h"
+#include "utils.h"
 
 typedef struct {
     std::string s;
@@ -32,6 +33,7 @@ namespace ClockAuction
 
             std::string getJsonString();
 
+            void toStatusJsonObject(JSON_Object* root_object, int rc, std::string& message);
             void toStatusJsonString(int rc, std::string& message, std::string& jsonString);
 
             void toCreateAuctionJson(int rc, std::string& message, unsigned int auctionId);
@@ -42,5 +44,9 @@ namespace ClockAuction
 
             void toDynamicAuctionStateJson(const DynamicAuctionState& dynamicAuctionState);
             bool fromDynamicAuctionStateJson(DynamicAuctionState& dynamicAuctionState);
+
+            bool fromGetAuctionDetailsJson(uint32_t& auctionId);
+            void toGetAuctionDetailsJson(int rc, std::string& message, const StaticAuctionState& staticAuctionState);
+
     };
 }

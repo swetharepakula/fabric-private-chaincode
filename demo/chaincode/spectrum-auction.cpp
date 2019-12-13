@@ -9,6 +9,7 @@
 #include "spectrum-auction-message.h"
 #include "error-codes.h"
 #include "storage.h"
+#include "utils.h"
 
 #define AUCTION_ID_COUNTER_STRING "AuctionIdCounter"
 #define AUCTION_ID_FIRST_COUNTER_VALUE 401
@@ -54,6 +55,30 @@ void ClockAuction::SpectrumAuction::storeAuctionState()
     }
 }
 
+bool ClockAuction::SpectrumAuction::loadAuctionState()
+{
+    {   // load static state
+        std::string stateKey("Auction." + std::to_string(auctionIdCounter_) + ".staticAuctionState");
+        std::string stateValue;
+        auctionStorage_.ledgerPrivateGetString(stateKey, stateValue);
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, stateValue.length() == 0);
+        // next is same as for createAuction
+        JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(stateValue.c_str());
+        FAST_FAIL_CHECK_EX(er_, &staticAuctionState_.er_, EC_INVALID_INPUT, !staticAuctionState_.fromExtendedJsonObject(root_object));
+        ClockAuction::JsonUtils::closeJsonObject(root_object, NULL);
+    }
+    {   // load dynamic state
+        std::string stateKey("Auction." + std::to_string(auctionIdCounter_) + ".dynamicAuctionState");
+        std::string stateValue;
+        auctionStorage_.ledgerPrivateGetString(stateKey, stateValue);
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, stateValue.length() == 0);
+        JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(stateValue.c_str());
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, !dynamicAuctionState_.fromJsonObject(root_object));
+        ClockAuction::JsonUtils::closeJsonObject(root_object, NULL);
+    }
+    return true;
+}
+
 bool ClockAuction::SpectrumAuction::createAuction(const std::string& inputString,
         std::string& outputString, ClockAuction::ErrorReport& er)
 {
@@ -67,6 +92,9 @@ bool ClockAuction::SpectrumAuction::createAuction(const std::string& inputString
     }
     
     //all check passed, install auction
+
+    // FAKE owner
+    staticAuctionState_.fakeOwner();    
 
     //get auction id
     InitializeAuctionIdCounter();
@@ -91,4 +119,17 @@ bool ClockAuction::SpectrumAuction::createAuction(const std::string& inputString
 
 bool ClockAuction::SpectrumAuction::getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er)
 {
+    // parse and validate input string
+    ClockAuction::SpectrumAuctionMessage inMsg(inputString);
+    FAST_FAIL_CHECK(er, EC_INVALID_INPUT, !inMsg.fromGetAuctionDetailsJson(auctionIdCounter_));
+    FAST_FAIL_CHECK_EX(er, &er_, EC_INVALID_INPUT, !loadAuctionState());
+
+    //all check passed, return details
+    er.set(EC_SUCCESS, "");
+    ClockAuction::SpectrumAuctionMessage msg;
+    int rc = 0;
+    std::string statusMessage("Auction details");
+    msg.toGetAuctionDetailsJson(rc, statusMessage, staticAuctionState_);
+    outputString = msg.getJsonString();
+    return true;
 }

@@ -14,18 +14,16 @@ namespace ClockAuction
     class Principal
     {
         private:
-            uint32_t id_;
+            //uint32_t id_;
             std::string mspId_;
             std::string dn_;
-            std::string name_;
-
-            ErrorReport er_;
+            //std::string name_;
 
         public:
-            //Principal(uint32_t id, std::string& mspId, std::string& dn, std::string& name);
-            //bool toJson(std::string& jsonString);
-            //bool fromJson(std::string& jsonString);
+            Principal();
+            Principal(std::string m, std::string d);
             bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
+            ErrorReport er_;
     };
 }

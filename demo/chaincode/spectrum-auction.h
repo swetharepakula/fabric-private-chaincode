@@ -25,9 +25,11 @@ namespace ClockAuction
             ClockAuction::Storage auctionStorage_;
 
             void storeAuctionState();
+            bool loadAuctionState();
 
         public:
             SpectrumAuction(shim_ctx_ptr_t ctx);
+            ErrorReport er_;
 
             bool createAuction(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
             bool getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);

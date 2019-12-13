@@ -36,13 +36,15 @@ namespace ClockAuction
             std::vector<Eligibility> initialEligibilities_;
             uint32_t activityRequirementPercentage_;
             uint32_t clockPriceIncrementPercentage_;
-            ErrorReport er_;
             
         public:
             bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
+            bool fromExtendedJsonObject(const JSON_Object* root_object);
             bool checkValidity();
+            void fakeOwner();
             ErrorReport getErrorReport();
+            ErrorReport er_;
     };
 
     class DynamicAuctionState

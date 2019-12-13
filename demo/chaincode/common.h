@@ -6,7 +6,7 @@
 
 #pragma once
 
-#define DO_DEBUG true
+//#define DO_DEBUG true
 
 #include "shim.h"
 #include "logging.h"
