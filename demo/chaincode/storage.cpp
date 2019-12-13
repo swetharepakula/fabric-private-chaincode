@@ -23,6 +23,11 @@ void ClockAuction::Storage::ledgerPrivateGetString(const std::string& key, std::
 
     //try the fast path
     ledgerPrivateGetBinary((const uint8_t*)key.c_str(), key.length(), (uint8_t*)v.data(), v.size(), &actualValueLength);
+    if(actualValueLength > v.size())
+    {
+        LOG_ERROR("ERROR: returned length greater than provided max-length");
+        return;
+    }
     if(actualValueLength > 0) //string retrieved, return
     {
         v.push_back('\0');
@@ -54,6 +59,12 @@ void ClockAuction::Storage::ledgerPrivateGetString(const std::string& key, std::
         }
 
         ledgerPrivateGetBinary((const uint8_t*)key.c_str(), key.length(), (uint8_t*)v.data(), v.capacity()-1, &actualValueLength);
+        if(actualValueLength > v.size())
+        {
+            LOG_ERROR("ERROR: returned length greater than provided max-length");
+            return;
+        }
+
         if(actualValueLength > 0) //string retrieved, return
         {
             v.push_back('\0');
