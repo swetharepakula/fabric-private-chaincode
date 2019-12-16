@@ -7,89 +7,74 @@
 #include "common.h"
 #include "storage.h"
 
+#define MAX_LENGTH_STRING_SIZE 10 // order of gigabytes
+
 ClockAuction::Storage::Storage(shim_ctx_ptr_t ctx) : ctx_(ctx)
 {}
 
 void ClockAuction::Storage::ledgerPrivatePutString(const std::string& key, const std::string& value)
 {
-    ledgerPrivatePutBinary((const uint8_t*)key.c_str(), key.length(), (const uint8_t*)value.c_str(), value.length()+1);
+    // first write length -- string with null char
+    unsigned int valueLength = value.length() + 1;
+    std::string valueLengthString = std::to_string(valueLength);
+    if(valueLengthString.length() == 0 || valueLengthString.length() > MAX_LENGTH_STRING_SIZE)
+    {
+        LOG_ERROR("value length is 0 or too large. No data will be written to ledger");
+        return;
+    }
+    std::string valueLengthKey = key + "L";
+    ledgerPrivatePutBinary((const uint8_t*)valueLengthKey.c_str(), valueLengthKey.length(), (const uint8_t*)valueLengthString.c_str(), valueLengthString.length() + 1);
+
+    // second, write actual value
+    std::string valueKey = key + "K";
+    ledgerPrivatePutBinary((uint8_t*)valueKey.c_str(), valueKey.length(), (const uint8_t*)value.c_str(), valueLength);
 }
 
 void ClockAuction::Storage::ledgerPrivateGetString(const std::string& key, std::string& value)
 {
+    //first, get the value length
+    uint8_t valueLengthArray[MAX_LENGTH_STRING_SIZE+1];
+    uint32_t actualValueLengthLength=0;
+    std::string valueLengthKey = key + "L";
+    ledgerPrivateGetBinary((uint8_t*)valueLengthKey.c_str(), valueLengthKey.length(), valueLengthArray, MAX_LENGTH_STRING_SIZE + 1, &actualValueLengthLength);
+    if(actualValueLengthLength == 0)
+    {
+        LOG_DEBUG("Key not found -- length not stored");
+        return;
+    }
+    if(actualValueLengthLength > MAX_LENGTH_STRING_SIZE)
+    {
+        LOG_ERROR("Value length returned is too large");
+        return;
+    }
+    if(valueLengthArray[actualValueLengthLength - 1] != '\0')
+    {
+        LOG_ERROR("Value length returned is not null terminated");
+        return;
+    }
+    uint32_t storedValueLength = std::stoul(std::string((char*)valueLengthArray), NULL, 10);
+
+    //second, get the value
+    std::string valueKey = key + "K";
+    uint8_t valueBinary[storedValueLength];
     uint32_t actualValueLength = 0;
-    value.clear();
-    std::vector<char> v;
-
-    //try the fast path
-    ledgerPrivateGetBinary((const uint8_t*)key.c_str(), key.length(), (uint8_t*)v.data(), v.size(), &actualValueLength);
-    if(actualValueLength > v.size())
+    ledgerPrivateGetBinary((uint8_t*)valueKey.c_str(), valueKey.length(), valueBinary, storedValueLength, &actualValueLength);
+    if(actualValueLength != storedValueLength)
     {
-        LOG_ERROR("ERROR: returned length greater than provided max-length");
+        LOG_ERROR("Unexpected length of retrieved value -- no value returned");
         return;
     }
-    if(actualValueLength > 0) //string retrieved, return
+    if(valueBinary[storedValueLength-1] != '\0')
     {
-        v.push_back('\0');
-        value.assign(v.data());
-        //check string length
-        if(v.size() != value.length() + 1)
-        {
-            LOG_ERROR("Error: string unexpectedly shorter than retrieved buffer ");
-            value.clear();
-        }
+        LOG_ERROR("Retrieved value is not null terminated -- no value returned");
         return;
     }
-    
-    //slow path: zero string means either no value, or value is larger than current capacity
-    int power = 0;
-    while(v.size() > (1 << power++));
-    for(; power < 17; power++) //keep doubling capacity up to 2^17 (128K)
-    {
-        uint32_t newCapacity = (1 << power);
-        LOG_DEBUG("retry get with capacity %u", newCapacity);
-        try
-        {
-            v.resize(newCapacity);
-        }
-        catch(...)
-        {
-            LOG_ERROR("capacity change (%u) failed, assuming no key available", newCapacity);
-            return;
-        }
-
-        ledgerPrivateGetBinary((const uint8_t*)key.c_str(), key.length(), (uint8_t*)v.data(), v.capacity()-1, &actualValueLength);
-        if(actualValueLength > v.size())
-        {
-            LOG_ERROR("ERROR: returned length greater than provided max-length");
-            return;
-        }
-
-        if(actualValueLength > 0) //string retrieved, return
-        {
-            v.push_back('\0');
-            LOG_DEBUG("retrieved value (len %u)", actualValueLength);
-            value.assign(v.data());
-            LOG_DEBUG("vectlen %u str len %u", v.size(), value.length());
-            //check string length
-            if(actualValueLength != value.length() + 1)
-            {
-                LOG_ERROR("Error: string unexpectedly shorter than retrieved buffer ");
-                value.clear();
-            }
-            if(value.length() == 0)
-                LOG_ERROR("why ths is zero?");
-            LOG_DEBUG("retrieved value (len %u): %s", actualValueLength, value.c_str());
-            return;
-        }
-    }
+    value.assign((char*)valueBinary);
 }
 
 void ClockAuction::Storage::ledgerPrivatePutBinary(const uint8_t* key, const uint32_t keyLength, const uint8_t* value, const uint32_t valueLength)
 {
-    uint8_t* pvalue = (uint8_t*)value; //TODO: fix drop const
-    LOG_DEBUG("writing value length %u", valueLength);
-    put_state((const char*)key, pvalue, valueLength, ctx_);
+    put_state((const char*)key, (uint8_t*)value, valueLength, ctx_);
 }
 
 void ClockAuction::Storage::ledgerPrivateGetBinary(const uint8_t* key, const uint32_t keyLength, uint8_t* value, const uint32_t valueLength, uint32_t* actualValueLength)
