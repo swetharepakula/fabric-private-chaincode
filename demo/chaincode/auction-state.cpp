@@ -11,8 +11,6 @@
 bool ClockAuction::StaticAuctionState::toJsonObject(JSON_Object* root_object) const
 {
     {
-        //JSON_Value* v = json_value_init_object();
-        //JSON_Object* o = json_value_get_object(v);
         JSON_Object* o = ClockAuction::JsonUtils::openJsonObject(NULL);
         owner_.toJsonObject(o);
         json_object_set_value(root_object, "owner", json_object_get_wrapping_value(o));
@@ -162,7 +160,7 @@ bool ClockAuction::DynamicAuctionState::toJsonObject(JSON_Object* root_object) c
 {
     json_object_set_number(root_object, "state", auctionState_);
     json_object_set_number(root_object, "clockRound", clockRound_);
-    json_object_set_boolean(root_object, "RoundActive", (int)roundActive_);
+    json_object_set_boolean(root_object, "roundActive", (int)roundActive_);
     return true;
 }
 
@@ -178,8 +176,9 @@ bool ClockAuction::DynamicAuctionState::fromJsonObject(const JSON_Object* root_o
         FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, clockRound_ == 0);
     }
     {
-        roundActive_ = json_object_get_boolean(root_object, "roundActive");
-        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, roundActive_ == 0);
+        int b = json_object_get_boolean(root_object, "roundActive");
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, roundActive_ == -1);
+        roundActive_ = b;
     }
     return true;
 }

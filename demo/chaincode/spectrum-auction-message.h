@@ -48,5 +48,8 @@ namespace ClockAuction
             bool fromGetAuctionDetailsJson(uint32_t& auctionId);
             void toGetAuctionDetailsJson(int rc, std::string& message, const StaticAuctionState& staticAuctionState);
 
+            bool fromGetAuctionStatusJson(uint32_t& auctionId);
+            void toGetAuctionStatusJson(int rc, std::string& message, const DynamicAuctionState& dynamicAuctionState);
+
     };
 }

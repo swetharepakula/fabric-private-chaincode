@@ -33,6 +33,7 @@ namespace ClockAuction
 
             bool createAuction(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
             bool getAuctionDetails(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
+            bool getAuctionStatus(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
     };
 }
 

@@ -46,12 +46,14 @@ void ClockAuction::SpectrumAuction::storeAuctionState()
         outStateMsg.toStaticAuctionStateJson(staticAuctionState_);
         std::string stateKey("Auction." + std::to_string(auctionIdCounter_) + ".staticAuctionState");
         auctionStorage_.ledgerPrivatePutString(stateKey, outStateMsg.getJsonString());
+        LOG_DEBUG("Stored static state: %s", (outStateMsg.getJsonString()).c_str());
     }
     {   // store dynamic state
         ClockAuction::SpectrumAuctionMessage outStateMsg;
         outStateMsg.toDynamicAuctionStateJson(dynamicAuctionState_);
         std::string stateKey("Auction." + std::to_string(auctionIdCounter_) + ".dynamicAuctionState");
         auctionStorage_.ledgerPrivatePutString(stateKey, outStateMsg.getJsonString());
+        LOG_DEBUG("Stored dynamic state: %s", (outStateMsg.getJsonString()).c_str());
     }
 }
 
@@ -133,3 +135,21 @@ bool ClockAuction::SpectrumAuction::getAuctionDetails(const std::string& inputSt
     outputString = msg.getJsonString();
     return true;
 }
+
+bool ClockAuction::SpectrumAuction::getAuctionStatus(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er)
+{
+    // parse and validate input string
+    ClockAuction::SpectrumAuctionMessage inMsg(inputString);
+    FAST_FAIL_CHECK(er, EC_INVALID_INPUT, !inMsg.fromGetAuctionStatusJson(auctionIdCounter_));
+    FAST_FAIL_CHECK_EX(er, &er_, EC_INVALID_INPUT, !loadAuctionState());
+
+    //all check passed, return details
+    er.set(EC_SUCCESS, "");
+    ClockAuction::SpectrumAuctionMessage msg;
+    int rc = 0;
+    std::string statusMessage("Auction status");
+    msg.toGetAuctionStatusJson(rc, statusMessage, dynamicAuctionState_);
+    outputString = msg.getJsonString();
+    return true;
+}
+

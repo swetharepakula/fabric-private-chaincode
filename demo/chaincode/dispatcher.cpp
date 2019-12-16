@@ -27,6 +27,7 @@ ClockAuction::Dispatcher::Dispatcher(const std::string& functionName,
     std::map<std::string, spectrumAuctionFunctionP> fMap_;
     fMap_.emplace(std::make_pair("createAuction",       &ClockAuction::SpectrumAuction::createAuction));
     fMap_.emplace(std::make_pair("getAuctionDetails",   &ClockAuction::SpectrumAuction::getAuctionDetails));
+    fMap_.emplace(std::make_pair("getAuctionStatus",   &ClockAuction::SpectrumAuction::getAuctionStatus));
 
     LOG_DEBUG("Try dispatch function %s with parameters %s", functionName_.c_str(), functionParameters[0].c_str());
 
