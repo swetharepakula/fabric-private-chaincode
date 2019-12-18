@@ -52,17 +52,6 @@ void ClockAuction::SpectrumAuctionMessage::toCreateAuctionJson(int rc, std::stri
         json_object_set_value(root_object, "response", json_object_get_wrapping_value(r));
     }
     ClockAuction::JsonUtils::closeJsonObject(root_object, &jsonString_);
-    //std::string jsonStatusString;
-    //toStatusJsonString(rc, message, jsonStatusString);
-//
-    //JSON_Value* root_value = json_value_init_object();
-    //JSON_Object* root_object = json_value_get_object(root_value);
-    //json_object_set_string(root_object, "status", jsonStatusString.c_str());
-    //json_object_set_number(root_object, "id", auctionId);
-    //char* serialized_string = json_serialize_to_string(root_value);
-    //jsonString_.assign(serialized_string);
-    //json_free_serialized_string(serialized_string);
-    //json_value_free(root_value);
 }
 
 bool ClockAuction::SpectrumAuctionMessage::fromCreateAuctionJson(StaticAuctionState& staticAuctionState)
@@ -89,7 +78,6 @@ void ClockAuction::SpectrumAuctionMessage::toGetAuctionDetailsJson(int rc, std::
         toStatusJsonObject(r, rc, message);
         json_object_set_value(root_object, "status", json_object_get_wrapping_value(r));
     }
-    toStatusJsonObject(root_object, rc, message);
     {
         JSON_Object* r = ClockAuction::JsonUtils::openJsonObject(NULL);
         staticAuctionState.toJsonObject(r);
@@ -114,11 +102,48 @@ void ClockAuction::SpectrumAuctionMessage::toGetAuctionStatusJson(int rc, std::s
         toStatusJsonObject(r, rc, message);
         json_object_set_value(root_object, "status", json_object_get_wrapping_value(r));
     }
-    toStatusJsonObject(root_object, rc, message);
     {
         JSON_Object* r = ClockAuction::JsonUtils::openJsonObject(NULL);
         dynamicAuctionState.toJsonObject(r);
         json_object_set_value(root_object, "response", json_object_get_wrapping_value(r));
+    }
+    ClockAuction::JsonUtils::closeJsonObject(root_object, &jsonString_);
+}
+
+bool ClockAuction::SpectrumAuctionMessage::fromStartNextRoundJson(uint32_t& auctionId)
+{
+    JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(inputJsonString_.c_str());
+    auctionId = json_object_get_number(root_object, "auctionId");
+    ClockAuction::JsonUtils::closeJsonObject(root_object, NULL);
+    return auctionId != 0;
+}
+
+void ClockAuction::SpectrumAuctionMessage::toStartNextRoundJson(int rc, std::string& message)
+{
+    JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(NULL);
+    {
+        JSON_Object* r = ClockAuction::JsonUtils::openJsonObject(NULL);
+        toStatusJsonObject(r, rc, message);
+        json_object_set_value(root_object, "status", json_object_get_wrapping_value(r));
+    }
+    ClockAuction::JsonUtils::closeJsonObject(root_object, &jsonString_);
+}
+
+bool ClockAuction::SpectrumAuctionMessage::fromEndRoundJson(uint32_t& auctionId)
+{
+    JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(inputJsonString_.c_str());
+    auctionId = json_object_get_number(root_object, "auctionId");
+    ClockAuction::JsonUtils::closeJsonObject(root_object, NULL);
+    return auctionId != 0;
+}
+
+void ClockAuction::SpectrumAuctionMessage::toEndRoundJson(int rc, std::string& message)
+{
+    JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(NULL);
+    {
+        JSON_Object* r = ClockAuction::JsonUtils::openJsonObject(NULL);
+        toStatusJsonObject(r, rc, message);
+        json_object_set_value(root_object, "status", json_object_get_wrapping_value(r));
     }
     ClockAuction::JsonUtils::closeJsonObject(root_object, &jsonString_);
 }

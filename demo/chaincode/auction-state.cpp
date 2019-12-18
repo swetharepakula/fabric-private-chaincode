@@ -183,3 +183,35 @@ bool ClockAuction::DynamicAuctionState::fromJsonObject(const JSON_Object* root_o
     return true;
 }
 
+bool ClockAuction::DynamicAuctionState::isRoundActive()
+{
+    return roundActive_;
+}
+
+void ClockAuction::DynamicAuctionState::startRound()
+{
+    roundActive_ = true;
+}
+
+void ClockAuction::DynamicAuctionState::endRound()
+{
+    roundActive_ = false;
+}
+
+
+void ClockAuction::DynamicAuctionState::endRoundAndAdvance()
+{
+    endRound();
+    clockRound_ ++;
+}
+
+bool ClockAuction::DynamicAuctionState::isStateClockPhase()
+{
+    return auctionState_ == CLOCK_PHASE;
+}
+
+bool ClockAuction::DynamicAuctionState::isStateAssignmentPhase()
+{
+    return auctionState_ == ASSIGNMENT_PHASE;
+}
+

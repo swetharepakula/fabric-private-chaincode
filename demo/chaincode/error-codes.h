@@ -9,15 +9,18 @@
 #include <string>
 
 typedef enum {
-    EC_UNDEFINED,              // 0
-    EC_SUCCESS,                // 1
-    EC_ERROR,                  // 2
-    EC_HIDDEN,                 // 3
-    EC_BAD_FUNCTION_NAME,      // 4
-    EC_INVALID_INPUT,          // 5
-    EC_MEMORY_ERROR,           // 6
-    EC_SHORT_RESPONSE_BUFFER,  // 7
-    EC_BAD_PARAMETERS          // 8
+    EC_UNDEFINED,               // 0
+    EC_SUCCESS,                 // 1
+    EC_ERROR,                   // 2
+    EC_HIDDEN,                  // 3
+    EC_BAD_FUNCTION_NAME,       // 4
+    EC_INVALID_INPUT,           // 5
+    EC_MEMORY_ERROR,            // 6
+    EC_SHORT_RESPONSE_BUFFER,   // 7
+    EC_BAD_PARAMETERS,          // 8
+    EC_AUCTION_RELATED_CODES,   // 9
+    EC_ROUND_ALREADY_ACTIVE,    //10
+    EC_RESTRICTED_AUCTION_STATE //11
 } error_codes_e;
 
 namespace ClockAuction

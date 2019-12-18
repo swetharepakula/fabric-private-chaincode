@@ -28,6 +28,8 @@ ClockAuction::Dispatcher::Dispatcher(const std::string& functionName,
     fMap_.emplace(std::make_pair("createAuction",       &ClockAuction::SpectrumAuction::createAuction));
     fMap_.emplace(std::make_pair("getAuctionDetails",   &ClockAuction::SpectrumAuction::getAuctionDetails));
     fMap_.emplace(std::make_pair("getAuctionStatus",   &ClockAuction::SpectrumAuction::getAuctionStatus));
+    fMap_.emplace(std::make_pair("startNextRound",   &ClockAuction::SpectrumAuction::startNextRound));
+    fMap_.emplace(std::make_pair("endRound",   &ClockAuction::SpectrumAuction::endRound));
 
     LOG_DEBUG("Try dispatch function %s with parameters %s", functionName_.c_str(), functionParameters[0].c_str());
 

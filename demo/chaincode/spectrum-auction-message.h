@@ -48,6 +48,12 @@ namespace ClockAuction
             bool fromGetAuctionDetailsJson(uint32_t& auctionId);
             void toGetAuctionDetailsJson(int rc, std::string& message, const StaticAuctionState& staticAuctionState);
 
+            bool fromStartNextRoundJson(uint32_t& auctionId);
+            void toStartNextRoundJson(int rc, std::string& message);
+
+            bool fromEndRoundJson(uint32_t& auctionId);
+            void toEndRoundJson(int rc, std::string& message);
+
             bool fromGetAuctionStatusJson(uint32_t& auctionId);
             void toGetAuctionStatusJson(int rc, std::string& message, const DynamicAuctionState& dynamicAuctionState);
 

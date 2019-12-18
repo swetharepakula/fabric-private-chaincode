@@ -143,7 +143,7 @@ bool ClockAuction::SpectrumAuction::getAuctionStatus(const std::string& inputStr
     FAST_FAIL_CHECK(er, EC_INVALID_INPUT, !inMsg.fromGetAuctionStatusJson(auctionIdCounter_));
     FAST_FAIL_CHECK_EX(er, &er_, EC_INVALID_INPUT, !loadAuctionState());
 
-    //all check passed, return details
+    //all check passed, return status
     er.set(EC_SUCCESS, "");
     ClockAuction::SpectrumAuctionMessage msg;
     int rc = 0;
@@ -153,3 +153,50 @@ bool ClockAuction::SpectrumAuction::getAuctionStatus(const std::string& inputStr
     return true;
 }
 
+bool ClockAuction::SpectrumAuction::startNextRound(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er)
+{
+    // parse and validate input string
+    ClockAuction::SpectrumAuctionMessage inMsg(inputString);
+    FAST_FAIL_CHECK(er, EC_INVALID_INPUT, !inMsg.fromStartNextRoundJson(auctionIdCounter_));
+    FAST_FAIL_CHECK_EX(er, &er_, EC_INVALID_INPUT, !loadAuctionState());
+    FAST_FAIL_CHECK(er, EC_ROUND_ALREADY_ACTIVE, dynamicAuctionState_.isRoundActive());
+    FAST_FAIL_CHECK(er, EC_RESTRICTED_AUCTION_STATE, !dynamicAuctionState_.isStateClockPhase() && !dynamicAuctionState_.isStateAssignmentPhase());
+
+    //all check passed
+
+    dynamicAuctionState_.startRound();
+
+    storeAuctionState();
+
+    er.set(EC_SUCCESS, "");
+    ClockAuction::SpectrumAuctionMessage msg;
+    int rc = 0;
+    std::string statusMessage("Start next round");
+    msg.toStartNextRoundJson(rc, statusMessage);
+    outputString = msg.getJsonString();
+    return true;
+}
+
+bool ClockAuction::SpectrumAuction::endRound(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er)
+{
+    // parse and validate input string
+    ClockAuction::SpectrumAuctionMessage inMsg(inputString);
+    FAST_FAIL_CHECK(er, EC_INVALID_INPUT, !inMsg.fromEndRoundJson(auctionIdCounter_));
+    FAST_FAIL_CHECK_EX(er, &er_, EC_INVALID_INPUT, !loadAuctionState());
+    FAST_FAIL_CHECK(er, EC_ROUND_ALREADY_ACTIVE, !dynamicAuctionState_.isRoundActive());
+    FAST_FAIL_CHECK(er, EC_RESTRICTED_AUCTION_STATE, !dynamicAuctionState_.isStateClockPhase() && !dynamicAuctionState_.isStateAssignmentPhase());
+
+    //all check passed
+
+    dynamicAuctionState_.endRound();
+
+    // TODO evaluate round
+
+    er.set(EC_SUCCESS, "");
+    ClockAuction::SpectrumAuctionMessage msg;
+    int rc = 0;
+    std::string statusMessage("End round");
+    msg.toEndRoundJson(rc, statusMessage);
+    outputString = msg.getJsonString();
+    return true;
+}

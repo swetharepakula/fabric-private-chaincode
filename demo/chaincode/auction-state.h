@@ -19,6 +19,7 @@ typedef enum
     CLOCK_PHASE,
     ASSIGNMENT_PHASE,
     FSR_FAILED,
+    CLOSED,
     MAX_STATE_INDEX
 } auction_state_e;
 
@@ -60,5 +61,12 @@ namespace ClockAuction
             DynamicAuctionState(auction_state_e auctionState, uint32_t clockRound, bool roundActive);
             bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
+
+            bool isRoundActive();
+            void startRound();
+            void endRound();
+            void endRoundAndAdvance();
+            bool isStateClockPhase();
+            bool isStateAssignmentPhase();
     };
 }
