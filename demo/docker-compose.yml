@@ -1,0 +1,36 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+networks:
+  basic:
+
+services:
+  auction_client:
+    container_name: auction_client 
+    image: auction_client_backend
+    ports:
+      - "3000:3000"
+    working_dir: /usr/src/app
+    command: npm start
+    volumes:
+      - ./client/backend/fabric-gateway/src:/usr/src/app/src
+
+  auction_frontend:
+    container_name: auction_frontend
+    image: auction_frontend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./client/frontend/src:/usr/src/app/src 
+    depends_on:
+      - auction_client
+    
+networks:
+  default:
+    external:
+      name: ${COMPOSE_PROJECT_NAME}_basic

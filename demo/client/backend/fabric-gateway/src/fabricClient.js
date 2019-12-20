@@ -155,9 +155,17 @@ async function submitToFabric (bSubmitTransaction, userName, txName, ...args) {
         }
         return result.then((response) => {
             let strResponse = response.toString();
-            console.log ('Response (string): ', strResponse);
+            let jsonResponse = JSON.parse(strResponse);
+
+            // jsonResponse.ResponseData = JSON.parse(Buffer.from(jsonResponse.ResponseData,"base64").toString());
+            // jsonResponse.Signature = Buffer.from(jsonResponse.Signature,"base64").toString();
+            // jsonResponse.PublicKey = Buffer.from(jsonResponse.PublicKey,"base64").toString();
+
+            console.log("Response (string): ", jsonResponse);
             let result = prepareStatus (SUCCESS, 'Transaction submitted successfully');
-            result['Response'] = strResponse;
+            // result['Response'] = JSON.parse(Buffer.from(jsonResponse.ResponseData,"base64").toString());
+            result = JSON.parse(Buffer.from(jsonResponse.ResponseData,"base64").toString());
+;
             return result;
         },(error) =>
         {

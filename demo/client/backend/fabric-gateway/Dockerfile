@@ -19,5 +19,6 @@ WORKDIR /usr/src/app
 COPY gateway /usr/src/app/gateway
 COPY src /usr/src/app/src
 COPY config.json /usr/src/app/config.json
+COPY auction.json /usr/src/app/auction.json
 RUN npm install
 CMD npm start

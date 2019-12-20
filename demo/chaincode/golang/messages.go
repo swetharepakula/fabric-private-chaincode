@@ -83,7 +83,7 @@ type Auction struct {
 }
 
 type Principle struct {
-	Mspid []byte `json:"mspid"`
+	Mspid string `json:"mspid"`
 	Dn    string `json:"dn"`
 }
 

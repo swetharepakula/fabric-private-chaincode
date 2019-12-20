@@ -81,7 +81,7 @@ func createAuction(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	}
 
 	// assign owner
-	auction.Owner = &Principle{[]byte("auctioneeer@org4"), "auctioneeer"}
+	auction.Owner = &Principle{"auctioneeer@org4", "auctioneeer"}
 
 	auctionJson, err := json.Marshal(auction)
 	if err != nil {
