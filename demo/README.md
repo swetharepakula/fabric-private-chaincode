@@ -3,10 +3,14 @@
 ###  Prerequisites
 - It is assumed that Fabric Private Chaincode repository on your machine is installed in $FPC_PATH.
 - JSON processor, jq is installed.
+- FPC Peer Docker Image has been created as per the FPC Network [Instructions](../utils/docker-compose/README.md#Steps) in Step 1.
 
 Instructions to bring up end-to-end application to be added here.
 
-## Backend client
+## Bring up the demo
+
+
+## Manually Bring Up Backend client
 
 ### Usage
 ```
@@ -17,7 +21,7 @@ docker build -t auction_client_backend .
 
 ###  Register users
 
-Before the following steps can be run, an FPC network should be setup using [README](https://github.com/hyperledger-labs/fabric-private-chaincode/blob/master/utils/docker-compose/README.md).  Make sure to modify [config.json](https://github.com/hyperledger-labs/fabric-private-chaincode/blob/master/demo/client/backend/fabric-gateway/config.json) to refer to the correct chaincode name.  
+Before the following steps can be run, an FPC network should be setup using [README](../utils/docker-compose/README.md).  Make sure to modify [config.json](client/backend/fabric-gateway/config.json) to refer to the correct chaincode name.
 
 
 Register auction application users (bidders and auctioneers) with Certificate Authority
@@ -36,8 +40,8 @@ Note: This is work in progress.  Some environment variables are hardcoded in the
 
 
 ```                 
-cd $FPC_PATH/demo/client/backend/fabric-gateway
-export NETWORK_NAME=fabricfpc-fpc_basic
+cd $FPC_PATH/demo/client/backend
+export NETWORK_NAME=fabricfpc_basic
 export BACKEND_PORT=3000
 docker run --network $NETWORK_NAME -d  -v ${PWD}:/usr/src/app \
 		 -p $BACKEND_PORT:$BACKEND_PORT --name client_backend auction_client_backend

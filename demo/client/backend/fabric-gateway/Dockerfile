@@ -20,7 +20,8 @@ COPY \
 COPY src /usr/src/app/src
 COPY gateway /usr/src/app/gateway
 
+COPY config.json /usr/src/app/config.json
+COPY auction.json /usr/src/app/auction.json
 RUN npm install \
   &&  patch -R -p0 < ./fabric-sdk-node_fabric-network_lib_transaction.js.patch
-
 CMD npm start
