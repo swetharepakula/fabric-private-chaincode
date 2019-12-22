@@ -11,6 +11,8 @@ const { Gateway, FileSystemWallet, X509WalletMixin } = require('fabric-network')
 const fs = require('fs');
 const path = require('path');
 
+const logger = require('fabric-network/lib/logger').getLogger('Transaction');
+
 /////////////////  Global constants  /////////////////
 //  errorcodes
 const SUCCESS = 0;
@@ -156,17 +158,38 @@ async function submitToFabric (bSubmitTransaction, userName, txName, ...args) {
         return result.then((response) => {
             let strResponse = response.toString();
             console.log ('Response (string): ', strResponse);
-            let result = prepareStatus (SUCCESS, 'Transaction submitted successfully');
-            result['Response'] = strResponse;
+            let jsonResponse = JSON.parse(strResponse);
+	    // TODO (eventually): check signature ...
+	    let result = JSON.parse(Buffer.from(jsonResponse.ResponseData,"base64").toString());
+            console.log ('Decoded ResponseData: ', result);
             return result;
         },(error) =>
         {
-            // error from call to SDK
-            throw prepareStatus(FAILURE, error);
+            // error from result.then call to SDK
+	    console.log('Error on tx return: ', error)
+	    // find any payload
+	    // - for query it will be in error.payload
+	    let payload
+	    if (typeof error.payload !== 'undefined') {
+		console.log("Found query failure")
+	        payload = error.payload
+	    } else {
+	        // if none found, just throw our backend error
+                throw prepareStatus(FAILURE, "Error on tx return: "+error);
+            }
+	    // otherwise, return (fpc) response from (fabric) payload
+            let strResponse = payload.toString();
+            console.log ('Response (string): ', strResponse);
+            let jsonResponse = JSON.parse(strResponse);
+            // TODO (eventually): check signature ...
+            let result = JSON.parse(Buffer.from(jsonResponse.ResponseData,"base64").toString());
+            console.log ('Decoded ResponseData: ', result);
+	    return result
         });
     } catch (error) {
         // error from call to SDK
-        throw prepareStatus(FAILURE, error);
+	console.log('Error on tx init: ', error)
+        throw prepareStatus(FAILURE, "Error on tx init: "+error);
     }
 }
 
