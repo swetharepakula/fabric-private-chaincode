@@ -39,6 +39,7 @@ namespace ClockAuction
             bool getAuctionStatus(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
             bool startNextRound(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
             bool endRound(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
+            bool submitClockBid(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er);
     };
 }
 

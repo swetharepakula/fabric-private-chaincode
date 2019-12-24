@@ -181,10 +181,10 @@ func get_state(key *C.char, val *C.uint8_t, max_val_len C.uint32_t, val_len *C.u
 	if err != nil {
 		panic("error while getting state")
 	}
-    if len(data) > max_val_len {
-        C._set_int(val_len, C.uint32_t(0))
-        return
-    }
+	if C.uint32_t(len(data)) > max_val_len {
+		C._set_int(val_len, C.uint32_t(0))
+		return
+	}
 	C._cpy_bytes(val, (*C.uint8_t)(C.CBytes(data)), C.uint32_t(len(data)))
 	C._set_int(val_len, C.uint32_t(len(data)))
 

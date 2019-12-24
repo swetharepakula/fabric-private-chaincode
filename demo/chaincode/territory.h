@@ -22,7 +22,7 @@ namespace ClockAuction
         public:
             Channel();
             Channel(uint32_t id, std::string& name, uint32_t impairment);
-            bool toJsonObject(JSON_Object* root_object) const;
+            void toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
 
             ErrorReport er_;
@@ -40,9 +40,13 @@ namespace ClockAuction
         public:
             Territory();
             Territory(uint32_t id, std::string& name, bool isHighDemand, double minPrice, std::vector<Channel>& channels);
-            bool toJsonObject(JSON_Object* root_object) const;
+            void toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
 
             ErrorReport er_;
+
+            uint32_t getTerritoryId() const;
+            uint32_t numberOfChannels() const;
+            double getMinPrice() const;
     };
 }

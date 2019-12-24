@@ -12,4 +12,5 @@
 #include "logging.h"
 #include <string>
 #include <vector>
+#include <set>
 #include "json/parson.h"

@@ -10,6 +10,7 @@
 #include "common.h"
 #include "auction-state.h"
 #include "utils.h"
+#include "bid.h"
 
 typedef struct {
     std::string s;
@@ -23,10 +24,9 @@ namespace ClockAuction
             const std::string inputJsonString_;
             std::string jsonString_;
 
+        public:
             ErrorReport er_;
 
-
-        public:
             SpectrumAuctionMessage();
             SpectrumAuctionMessage(const std::string& message);
             ErrorReport getErrorReport();
@@ -34,6 +34,7 @@ namespace ClockAuction
             std::string getJsonString();
 
             void toStatusJsonObject(JSON_Object* root_object, int rc, std::string& message);
+            void toWrappedStatusJsonObject(JSON_Object* root_object, int rc, std::string& message);
             void toStatusJsonString(int rc, std::string& message, std::string& jsonString);
 
             void toCreateAuctionJson(int rc, std::string& message, unsigned int auctionId);
@@ -48,14 +49,16 @@ namespace ClockAuction
             bool fromGetAuctionDetailsJson(uint32_t& auctionId);
             void toGetAuctionDetailsJson(int rc, std::string& message, const StaticAuctionState& staticAuctionState);
 
+            bool fromGetAuctionStatusJson(uint32_t& auctionId);
+            void toGetAuctionStatusJson(int rc, std::string& message, const DynamicAuctionState& dynamicAuctionState);
+
             bool fromStartNextRoundJson(uint32_t& auctionId);
             void toStartNextRoundJson(int rc, std::string& message);
 
             bool fromEndRoundJson(uint32_t& auctionId);
             void toEndRoundJson(int rc, std::string& message);
 
-            bool fromGetAuctionStatusJson(uint32_t& auctionId);
-            void toGetAuctionStatusJson(int rc, std::string& message, const DynamicAuctionState& dynamicAuctionState);
-
+            bool fromSubmitClockBidJson(ClockAuction::Bid& bid);
+            void toSubmitClockBidJson(int rc, std::string& message);
     };
 }

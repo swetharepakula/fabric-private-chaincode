@@ -26,6 +26,13 @@ void ClockAuction::SpectrumAuctionMessage::toStatusJsonObject(JSON_Object* root_
     json_object_set_string(root_object, "message", message.c_str());
 }
 
+void ClockAuction::SpectrumAuctionMessage::toWrappedStatusJsonObject(JSON_Object* root_object, int rc, std::string& message)
+{
+    JSON_Object* r = ClockAuction::JsonUtils::openJsonObject(NULL);
+    toStatusJsonObject(r, rc, message);
+    json_object_set_value(root_object, "status", json_object_get_wrapping_value(r));
+}
+
 void ClockAuction::SpectrumAuctionMessage::toStatusJsonString(int rc, std::string& message, std::string& jsonString)
 {
     JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(NULL);
@@ -138,6 +145,25 @@ bool ClockAuction::SpectrumAuctionMessage::fromEndRoundJson(uint32_t& auctionId)
 }
 
 void ClockAuction::SpectrumAuctionMessage::toEndRoundJson(int rc, std::string& message)
+{
+    JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(NULL);
+    {
+        JSON_Object* r = ClockAuction::JsonUtils::openJsonObject(NULL);
+        toStatusJsonObject(r, rc, message);
+        json_object_set_value(root_object, "status", json_object_get_wrapping_value(r));
+    }
+    ClockAuction::JsonUtils::closeJsonObject(root_object, &jsonString_);
+}
+
+bool ClockAuction::SpectrumAuctionMessage::fromSubmitClockBidJson(Bid& bid)
+{
+    JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(inputJsonString_.c_str());
+    FAST_FAIL_CHECK_EX(er_, &bid.er_, EC_INVALID_INPUT, !bid.fromJsonObject(root_object));
+    ClockAuction::JsonUtils::closeJsonObject(root_object, NULL);
+    return true;
+}
+
+void ClockAuction::SpectrumAuctionMessage::toSubmitClockBidJson(int rc, std::string& message)
 {
     JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(NULL);
     {

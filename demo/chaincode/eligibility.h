@@ -19,5 +19,8 @@ namespace ClockAuction
             bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
             ErrorReport er_;
+
+            bool matchBidderId(uint32_t bidderId) const;
+            uint32_t getNumber() const;
     };
 }

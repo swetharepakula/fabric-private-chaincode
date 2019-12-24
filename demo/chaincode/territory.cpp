@@ -12,13 +12,11 @@ ClockAuction::Channel::Channel()
 ClockAuction::Channel::Channel(uint32_t id, std::string& name, uint32_t impairment) : id_(id), name_(name), impairment_(impairment)
 {}
 
-bool ClockAuction::Channel::toJsonObject(JSON_Object* root_object) const
+void ClockAuction::Channel::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_number(root_object, "id", id_);
     json_object_set_string(root_object, "name", name_.c_str());
     json_object_set_number(root_object, "impairment", impairment_);
-
-    return true;
 }
 
 bool ClockAuction::Channel::fromJsonObject(const JSON_Object* root_object)
@@ -45,7 +43,7 @@ ClockAuction::Territory::Territory()
 ClockAuction::Territory::Territory(uint32_t id, std::string& name, bool isHighDemand, double minPrice, std::vector<Channel>& channels) : id_(id), name_(name), isHighDemand_(isHighDemand), minPrice_(minPrice), channels_(channels)
 {}
 
-bool ClockAuction::Territory::toJsonObject(JSON_Object* root_object) const
+void ClockAuction::Territory::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_number(root_object, "id", id_);
     json_object_set_string(root_object, "name", name_.c_str());
@@ -95,4 +93,19 @@ bool ClockAuction::Territory::fromJsonObject(const JSON_Object* root_object)
         }
     }
     return true;
+}
+
+uint32_t ClockAuction::Territory::getTerritoryId() const
+{
+    return id_;
+}
+
+uint32_t ClockAuction::Territory::numberOfChannels() const
+{
+    return channels_.size();
+}
+
+double ClockAuction::Territory::getMinPrice() const
+{
+    return minPrice_;
 }

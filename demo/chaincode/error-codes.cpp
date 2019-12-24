@@ -23,6 +23,14 @@ void ClockAuction::ErrorReport::toStatusJsonString(std::string& jsonString)
     msg.toStatusJsonString(ec_, errorString_, jsonString);
 }
 
+void ClockAuction::ErrorReport::toWrappedStatusJsonString(std::string& jsonString)
+{
+    ClockAuction::SpectrumAuctionMessage msg;
+    JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(NULL);
+    msg.toWrappedStatusJsonObject(root_object, ec_, errorString_);
+    ClockAuction::JsonUtils::closeJsonObject(root_object, &jsonString);
+}
+
 bool ClockAuction::ErrorReport::isSuccess()
 {
     if(ec_ == EC_SUCCESS)

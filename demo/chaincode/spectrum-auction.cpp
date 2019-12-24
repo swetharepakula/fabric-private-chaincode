@@ -10,6 +10,7 @@
 #include "error-codes.h"
 #include "storage.h"
 #include "utils.h"
+#include "bid.h"
 
 #define AUCTION_ID_COUNTER_STRING "AuctionIdCounter"
 #define AUCTION_ID_FIRST_COUNTER_VALUE 401
@@ -103,7 +104,7 @@ bool ClockAuction::SpectrumAuction::createAuction(const std::string& inputString
     IncrementAndStoreAuctionIdCounter();
 
     // initialize dynamic state
-    dynamicAuctionState_ = DynamicAuctionState(CLOCK_PHASE, INITIAL_CLOCK_ROUND_NUMBER, false);
+    dynamicAuctionState_ = DynamicAuctionState(CLOCK_PHASE, INITIAL_CLOCK_ROUND_NUMBER, false, staticAuctionState_);
 
     //store static and dynamic state
     storeAuctionState();
@@ -183,12 +184,14 @@ bool ClockAuction::SpectrumAuction::endRound(const std::string& inputString, std
     ClockAuction::SpectrumAuctionMessage inMsg(inputString);
     FAST_FAIL_CHECK(er, EC_INVALID_INPUT, !inMsg.fromEndRoundJson(auctionIdCounter_));
     FAST_FAIL_CHECK_EX(er, &er_, EC_INVALID_INPUT, !loadAuctionState());
-    FAST_FAIL_CHECK(er, EC_ROUND_ALREADY_ACTIVE, !dynamicAuctionState_.isRoundActive());
+    FAST_FAIL_CHECK(er, EC_ROUND_NOT_ACTIVE, !dynamicAuctionState_.isRoundActive());
     FAST_FAIL_CHECK(er, EC_RESTRICTED_AUCTION_STATE, !dynamicAuctionState_.isStateClockPhase() && !dynamicAuctionState_.isStateAssignmentPhase());
 
     //all check passed
 
     dynamicAuctionState_.endRound();
+
+    storeAuctionState();
 
     // TODO evaluate round
 
@@ -197,6 +200,33 @@ bool ClockAuction::SpectrumAuction::endRound(const std::string& inputString, std
     int rc = 0;
     std::string statusMessage("End round");
     msg.toEndRoundJson(rc, statusMessage);
+    outputString = msg.getJsonString();
+    return true;
+}
+
+bool ClockAuction::SpectrumAuction::submitClockBid(const std::string& inputString, std::string& outputString, ClockAuction::ErrorReport& er)
+{
+    // parse and validate input string
+    ClockAuction::SpectrumAuctionMessage inMsg(inputString);
+    Bid submittedBid;
+    FAST_FAIL_CHECK_EX(er, &inMsg.er_,  EC_INVALID_INPUT, !inMsg.fromSubmitClockBidJson(submittedBid));
+    auctionIdCounter_ = submittedBid.auctionId_;
+    // retrieve auction data (also checks the auction id)
+    FAST_FAIL_CHECK_EX(er, &er_, EC_INVALID_INPUT, !loadAuctionState());
+    LOG_DEBUG("validate bid");
+
+    dynamicAuctionState_.fakeSubmitter(staticAuctionState_.fromBidderIdToPrincipal(1));
+
+    FAST_FAIL_CHECK_EX(er, &submittedBid.er_, EC_INVALID_INPUT, !submittedBid.isValid(staticAuctionState_, dynamicAuctionState_));
+
+    //all check passed
+    LOG_DEBUG("check passed");
+
+    er.set(EC_SUCCESS, "");
+    ClockAuction::SpectrumAuctionMessage msg;
+    int rc = 0;
+    std::string statusMessage("Submit clock bid");
+    msg.toSubmitClockBidJson(rc, statusMessage);
     outputString = msg.getJsonString();
     return true;
 }

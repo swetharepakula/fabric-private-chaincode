@@ -12,6 +12,25 @@ ClockAuction::Principal::Principal()
 ClockAuction::Principal::Principal(std::string m, std::string d) : mspId_(m), dn_(d)
 {}
 
+bool operator==(const ClockAuction::Principal& p1, const ClockAuction::Principal& p2)
+{
+    if(p1.getDn() == p2.getDn() && p1.getMspId() == p2.getMspId())
+    {
+        return true;
+    }
+    return false;
+}
+
+std::string ClockAuction::Principal::getDn() const
+{
+    return dn_;
+}
+
+std::string ClockAuction::Principal::getMspId() const
+{
+    return mspId_;
+}
+
 bool ClockAuction::Principal::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_string(root_object, "mspId", mspId_.c_str());

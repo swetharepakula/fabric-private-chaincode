@@ -24,6 +24,11 @@ namespace ClockAuction
             Principal(std::string m, std::string d);
             bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
+            std::string getDn() const;
+            std::string getMspId() const;
             ErrorReport er_;
     };
 }
+
+bool operator==(const ClockAuction::Principal& p1, const ClockAuction::Principal& p2);
+

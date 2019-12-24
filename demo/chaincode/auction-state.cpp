@@ -143,7 +143,7 @@ bool ClockAuction::StaticAuctionState::checkValidity()
 
 void ClockAuction::StaticAuctionState::fakeOwner()
 {
-    owner_ = Principal("duffy", "duck");
+    owner_ = bidders_[0].getPrincipal(); //fake with first bidder
 }
 
 ClockAuction::ErrorReport ClockAuction::StaticAuctionState::getErrorReport()
@@ -151,16 +151,175 @@ ClockAuction::ErrorReport ClockAuction::StaticAuctionState::getErrorReport()
     return er_;
 }
 
+bool ClockAuction::StaticAuctionState::isTerritoryIdValid(uint32_t checkId)
+{
+    for(unsigned int i=0; i<territories_.size(); i++)
+    {
+        if(checkId == territories_[i].getTerritoryId())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+const ClockAuction::Territory* ClockAuction::StaticAuctionState::getTerritory(uint32_t territoryId) const
+{
+    for (auto it = territories_.begin() ; it != territories_.end(); ++it)
+    {
+        if(it->getTerritoryId() == territoryId)
+        {
+            return &(*it);
+        }
+    }
+    return NULL;
+}
+
+bool ClockAuction::StaticAuctionState::isPrincipalOwner(const Principal& p) const
+{
+    return p == owner_;
+}
+
+bool ClockAuction::StaticAuctionState::isPrincipalBidder(const Principal& p)
+{
+    return  fromPrincipalToBidderId(p) != 0;
+}
+
+uint32_t ClockAuction::StaticAuctionState::fromPrincipalToBidderId(const Principal& p) const
+{
+    for(unsigned int i = 0; i< bidders_.size(); i++)
+    {
+        if(bidders_[i].matchPrincipal(p))
+        {
+            return bidders_[i].getId();
+        }
+    }
+    return 0; // no bidder id
+}
+
+const ClockAuction::Principal ClockAuction::StaticAuctionState::fromBidderIdToPrincipal(uint32_t bidderId) const
+{
+    for(unsigned int i = 0; i< bidders_.size(); i++)
+    {
+        if(bidders_[i].getId() == bidderId)
+        {
+            return bidders_[i].getPrincipal();
+        }
+    }
+}
+
+uint32_t ClockAuction::StaticAuctionState::getEligibilityNumber(uint32_t bidderId) const
+{
+    for(unsigned int i = 0; i < initialEligibilities_.size(); i++)
+    {
+        if(initialEligibilities_[i].matchBidderId(bidderId))
+        {
+            return initialEligibilities_[i].getNumber();
+        }
+    }
+}
+
+std::vector<double> ClockAuction::StaticAuctionState::getInitialPrices()
+{
+    std::vector<double> initialPrices;
+    for(unsigned int i=0; i < territories_.size(); i++)
+    {
+        initialPrices.push_back(territories_[i].getMinPrice());
+    }
+    return initialPrices;
+}
+
+std::vector<uint32_t> ClockAuction::StaticAuctionState::getInitialEligibilities()
+{
+    std::vector<uint32_t> initialEligibilities;
+    for(unsigned int i=0; i < initialEligibilities_.size(); i++)
+    {
+        initialEligibilities.push_back(initialEligibilities_[i].getNumber());
+    }
+    return initialEligibilities;
+}
+
+uint32_t ClockAuction::StaticAuctionState::getClockPriceIncrementPercentage()
+{
+    return clockPriceIncrementPercentage_;
+}
+
+/*
+ * *************************************
+ * DYNAMIC STATE ***********************
+ * *************************************
+ */
+
 ClockAuction::DynamicAuctionState::DynamicAuctionState() {}
 
-ClockAuction::DynamicAuctionState::DynamicAuctionState(auction_state_e auctionState, uint32_t clockRound, bool roundActive)
-: auctionState_(auctionState), clockRound_(clockRound), roundActive_(roundActive) {}
+ClockAuction::DynamicAuctionState::DynamicAuctionState(auction_state_e auctionState, uint32_t clockRound, bool roundActive, StaticAuctionState& staticAuctionState)
+: auctionState_(auctionState), clockRound_(clockRound), roundActive_(roundActive)
+{
+    {   // initialize posted prices
+        postedPrice_.resize(1); //dummy 0th
+        postedPrice_.push_back(staticAuctionState.getInitialPrices());
+    }
+    {   // initialize clock prices
+        clockPrice_.resize(1);
+        clockPrice_.push_back(postedPrice_[1]);
+        for(unsigned int i=0; i< clockPrice_[clockRound_].size(); i++)
+        {
+            clockPrice_[clockRound_][i] *= (1 + ((double)staticAuctionState.getClockPriceIncrementPercentage()/100));
+        }
+    }
+    {   // initialize eligibilities
+        eligibility_.resize(1);
+        eligibility_.push_back(staticAuctionState.getInitialEligibilities());
+    }
+}
 
 bool ClockAuction::DynamicAuctionState::toJsonObject(JSON_Object* root_object) const
 {
     json_object_set_number(root_object, "state", auctionState_);
     json_object_set_number(root_object, "clockRound", clockRound_);
     json_object_set_boolean(root_object, "roundActive", (int)roundActive_);
+    {
+        json_object_set_value(root_object, "postedPrice", json_value_init_array());
+        JSON_Array* postedprice_array = json_object_get_array(root_object, "postedPrice");
+        for(unsigned int i = 0; i < postedPrice_.size(); i++)
+        {
+            JSON_Value* perround_v = json_value_init_array();
+            JSON_Array* perround_array = json_value_get_array(perround_v);
+            for(unsigned int j = 0; j < postedPrice_[i].size(); j++)
+            {
+                json_array_append_number(perround_array, postedPrice_[i][j]);
+            }
+            json_array_append_value(postedprice_array, perround_v);
+        }
+    }
+    {
+        json_object_set_value(root_object, "clockPrice", json_value_init_array());
+        JSON_Array* clockprice_array = json_object_get_array(root_object, "clockPrice");
+        for(unsigned int i = 0; i < clockPrice_.size(); i++)
+        {
+            JSON_Value* perround_v = json_value_init_array();
+            JSON_Array* perround_array = json_value_get_array(perround_v);
+            for(unsigned int j = 0; j < clockPrice_[i].size(); j++)
+            {
+                json_array_append_number(perround_array, clockPrice_[i][j]);
+            }
+            json_array_append_value(clockprice_array, perround_v);
+        }
+    }
+    {
+        json_object_set_value(root_object, "eligibility", json_value_init_array());
+        JSON_Array* eligibility_array = json_object_get_array(root_object, "eligibility");
+        for(unsigned int i = 0; i < eligibility_.size(); i++)
+        {
+            JSON_Value* perround_v = json_value_init_array();
+            JSON_Array* perround_array = json_value_get_array(perround_v);
+            for(unsigned int j = 0; j < eligibility_[i].size(); j++)
+            {
+                json_array_append_number(perround_array, eligibility_[i][j]);
+            }
+            json_array_append_value(eligibility_array, perround_v);
+        }
+    }
     return true;
 }
 
@@ -180,10 +339,61 @@ bool ClockAuction::DynamicAuctionState::fromJsonObject(const JSON_Object* root_o
         FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, roundActive_ == -1);
         roundActive_ = b;
     }
+    {
+        JSON_Array* postedprice_array = json_object_get_array(root_object, "postedPrice");
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, postedprice_array == 0);
+        unsigned int postedPriceN = json_array_get_count(postedprice_array);
+        for(unsigned int i = 0; i < postedPriceN; i++)
+        {
+            JSON_Value* perround_v = json_array_get_value(postedprice_array, i);
+            JSON_Array* perround_array = json_value_get_array(perround_v);
+            unsigned int roundPostedPriceN = json_array_get_count(perround_array);
+            std::vector<double> roundPostedPrice;
+            for(unsigned int j = 0; j < roundPostedPriceN; j++)
+            {
+                roundPostedPrice.push_back(json_array_get_number(perround_array, j));
+            }
+            postedPrice_.push_back(roundPostedPrice);
+        }
+    }
+    {
+        JSON_Array* clockprice_array = json_object_get_array(root_object, "clockPrice");
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, clockprice_array == 0);
+        unsigned int clockPriceN = json_array_get_count(clockprice_array);
+        for(unsigned int i = 0; i < clockPriceN; i++)
+        {
+            JSON_Value* perround_v = json_array_get_value(clockprice_array, i);
+            JSON_Array* perround_array = json_value_get_array(perround_v);
+            unsigned int roundClockPriceN = json_array_get_count(perround_array);
+            std::vector<double> roundClockPrice;
+            for(unsigned int j = 0; j < roundClockPriceN; j++)
+            {
+                roundClockPrice.push_back(json_array_get_number(perround_array, j));
+            }
+            clockPrice_.push_back(roundClockPrice);
+        }
+    }
+    {
+        JSON_Array* eligibility_array = json_object_get_array(root_object, "eligibility");
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, eligibility_array == 0);
+        unsigned int eligibilityN = json_array_get_count(eligibility_array);
+        for(unsigned int i = 0; i < eligibilityN; i++)
+        {
+            JSON_Value* perround_v = json_array_get_value(eligibility_array, i);
+            JSON_Array* perround_array = json_value_get_array(perround_v);
+            unsigned int roundEligibilityN = json_array_get_count(perround_array);
+            std::vector<uint32_t> roundEligibility;
+            for(unsigned int j = 0; j < roundEligibilityN; j++)
+            {
+                roundEligibility.push_back(json_array_get_number(perround_array, j));
+            }
+            eligibility_.push_back(roundEligibility);
+        }
+    }
     return true;
 }
 
-bool ClockAuction::DynamicAuctionState::isRoundActive()
+bool ClockAuction::DynamicAuctionState::isRoundActive() const
 {
     return roundActive_;
 }
@@ -215,3 +425,17 @@ bool ClockAuction::DynamicAuctionState::isStateAssignmentPhase()
     return auctionState_ == ASSIGNMENT_PHASE;
 }
 
+uint32_t ClockAuction::DynamicAuctionState::getRound() const
+{
+    return clockRound_;
+}
+
+void ClockAuction::DynamicAuctionState::fakeSubmitter(const Principal p)
+{
+    submitterPrincipal_ = p;
+}
+
+const ClockAuction::Principal ClockAuction::DynamicAuctionState::getSubmitter() const
+{
+    return submitterPrincipal_;
+}

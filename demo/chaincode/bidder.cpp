@@ -37,3 +37,18 @@ bool ClockAuction::Bidder::fromJsonObject(const JSON_Object* root_object)
     }
     return true;
 }
+
+bool ClockAuction::Bidder::matchPrincipal(const Principal& p) const
+{
+    return p == principal_;
+}
+
+uint32_t ClockAuction::Bidder::getId() const
+{
+    return id_;
+}
+
+const ClockAuction::Principal ClockAuction::Bidder::getPrincipal() const
+{
+    return principal_;
+}

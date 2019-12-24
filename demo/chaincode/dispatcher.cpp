@@ -30,6 +30,7 @@ ClockAuction::Dispatcher::Dispatcher(const std::string& functionName,
     fMap_.emplace(std::make_pair("getAuctionStatus",   &ClockAuction::SpectrumAuction::getAuctionStatus));
     fMap_.emplace(std::make_pair("startNextRound",   &ClockAuction::SpectrumAuction::startNextRound));
     fMap_.emplace(std::make_pair("endRound",   &ClockAuction::SpectrumAuction::endRound));
+    fMap_.emplace(std::make_pair("submitClockBid",   &ClockAuction::SpectrumAuction::submitClockBid));
 
     LOG_DEBUG("Try dispatch function %s with parameters %s", functionName_.c_str(), functionParameters[0].c_str());
 
@@ -38,7 +39,7 @@ ClockAuction::Dispatcher::Dispatcher(const std::string& functionName,
     if (fIter == fMap_.end())
     {
         // No such function
-        errorReport_.set(EC_BAD_FUNCTION_NAME, "Auction API not found");
+        CUSTOM_ERROR_REPORT(errorReport_, EC_BAD_FUNCTION_NAME, "Auction API not found");
     }
     else
     {
@@ -51,15 +52,15 @@ ClockAuction::Dispatcher::Dispatcher(const std::string& functionName,
     if(responseString_.length() == 0 || !errorReport_.isSuccess())
     {
         // an error occurred: fill the response with the error/status message
-        errorReport_.toStatusJsonString(responseString_);
+        errorReport_.toWrappedStatusJsonString(responseString_);
         LOG_DEBUG("Error response string set: %s", responseString_.c_str());
     }
 
     if(responseString_.length() > max_response_len_)
     {
         LOG_ERROR("Response string too long to be output");
-        errorReport_.set(EC_SHORT_RESPONSE_BUFFER, "Response string too long to be output");
-        errorReport_.toStatusJsonString(responseString_);
+        CUSTOM_ERROR_REPORT(errorReport_, EC_SHORT_RESPONSE_BUFFER, "Response string too long to be output");
+        errorReport_.toWrappedStatusJsonString(responseString_);
     }
 
     // write response string (if possible)

@@ -31,3 +31,12 @@ bool ClockAuction::Eligibility::fromJsonObject(const JSON_Object* root_object)
     return true;
 }
 
+bool ClockAuction::Eligibility::matchBidderId(uint32_t bidderId) const
+{
+    return bidderId == bidderId_;
+}
+
+uint32_t ClockAuction::Eligibility::getNumber() const
+{
+    return number_;
+}
