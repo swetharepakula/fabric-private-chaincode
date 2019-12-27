@@ -8,13 +8,15 @@
 
 #include "common.h"
 #include "error-codes.h"
-#include "auction-state.h"
+//#include "auction-state.h"
 
 namespace ClockAuction
 {
     class Demand 
     {
         public:
+            Demand();
+            Demand(uint32_t territoryId, uint32_t quantity, double price);
             uint32_t territoryId_;
             uint32_t quantity_;
             double price_;
@@ -36,7 +38,8 @@ namespace ClockAuction
             bool fromJsonObject(const JSON_Object* root_object);
             void toJsonObject(JSON_Object* root_object) const;
 
-            bool isValid(const StaticAuctionState& sState, const DynamicAuctionState& dState);
-            uint32_t sumQuantityDemands();
+//            bool isValid(const ClockAuction::StaticAuctionState& sState, const ClockAuction::DynamicAuctionState& dState);
+            uint32_t sumQuantityDemands() const;
+            std::vector<uint32_t> getDemandedTerritoryIds() const;
     };
 }

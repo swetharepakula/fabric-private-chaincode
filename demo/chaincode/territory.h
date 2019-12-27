@@ -48,5 +48,6 @@ namespace ClockAuction
             uint32_t getTerritoryId() const;
             uint32_t numberOfChannels() const;
             double getMinPrice() const;
+            bool isHighDemand() const;
     };
 }

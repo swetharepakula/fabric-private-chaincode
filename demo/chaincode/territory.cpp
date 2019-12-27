@@ -109,3 +109,8 @@ double ClockAuction::Territory::getMinPrice() const
 {
     return minPrice_;
 }
+
+bool ClockAuction::Territory::isHighDemand() const
+{
+    return isHighDemand_;
+}

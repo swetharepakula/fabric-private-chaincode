@@ -76,7 +76,7 @@ bool ClockAuction::SpectrumAuction::loadAuctionState()
         auctionStorage_.ledgerPrivateGetString(stateKey, stateValue);
         FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, stateValue.length() == 0);
         JSON_Object* root_object = ClockAuction::JsonUtils::openJsonObject(stateValue.c_str());
-        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, !dynamicAuctionState_.fromJsonObject(root_object));
+        FAST_FAIL_CHECK_EX(er_, &dynamicAuctionState_.er_, EC_INVALID_INPUT, !dynamicAuctionState_.fromJsonObject(root_object));
         ClockAuction::JsonUtils::closeJsonObject(root_object, NULL);
     }
     return true;
@@ -165,7 +165,7 @@ bool ClockAuction::SpectrumAuction::startNextRound(const std::string& inputStrin
 
     //all check passed
 
-    dynamicAuctionState_.startRound();
+    dynamicAuctionState_.startRound(staticAuctionState_);
 
     storeAuctionState();
 
@@ -190,10 +190,8 @@ bool ClockAuction::SpectrumAuction::endRound(const std::string& inputString, std
     //all check passed
 
     dynamicAuctionState_.endRound();
-
+    evaluateClockRound();
     storeAuctionState();
-
-    // TODO evaluate round
 
     er.set(EC_SUCCESS, "");
     ClockAuction::SpectrumAuctionMessage msg;
@@ -213,14 +211,27 @@ bool ClockAuction::SpectrumAuction::submitClockBid(const std::string& inputStrin
     auctionIdCounter_ = submittedBid.auctionId_;
     // retrieve auction data (also checks the auction id)
     FAST_FAIL_CHECK_EX(er, &er_, EC_INVALID_INPUT, !loadAuctionState());
-    LOG_DEBUG("validate bid");
 
-    dynamicAuctionState_.fakeSubmitter(staticAuctionState_.fromBidderIdToPrincipal(1));
+    std::string priceString = std::to_string(((int)(submittedBid.demands_[0].price_)));
+    if(priceString[priceString.length()-2] == '8' && priceString[priceString.length()-1] == '8')
+    {
+        LOG_DEBUG("Bidder 2 submitted");
+        dynamicAuctionState_.fakeSubmitter(staticAuctionState_.fromBidderIdToPrincipal(2));
+    }
+    else
+    {
+        LOG_DEBUG("Bidder 1 submitted");
+        dynamicAuctionState_.fakeSubmitter(staticAuctionState_.fromBidderIdToPrincipal(1));
+    }
 
-    FAST_FAIL_CHECK_EX(er, &submittedBid.er_, EC_INVALID_INPUT, !submittedBid.isValid(staticAuctionState_, dynamicAuctionState_));
+    FAST_FAIL_CHECK_EX(er, &dynamicAuctionState_.er_, EC_INVALID_INPUT, !dynamicAuctionState_.isValidBid(staticAuctionState_, submittedBid));
+    LOG_DEBUG("valid bid");
 
     //all check passed
-    LOG_DEBUG("check passed");
+
+    dynamicAuctionState_.storeBid(staticAuctionState_, submittedBid);
+
+    storeAuctionState();
 
     er.set(EC_SUCCESS, "");
     ClockAuction::SpectrumAuctionMessage msg;

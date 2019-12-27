@@ -12,6 +12,7 @@
 #include "eligibility.h"
 #include "territory.h"
 #include "error-codes.h"
+#include "bid.h"
 
 typedef enum
 {
@@ -49,16 +50,24 @@ namespace ClockAuction
 
             bool isTerritoryIdValid(uint32_t checkId);
             const Territory* getTerritory(uint32_t territoryId) const;
+            int32_t getTerritoryIndex(uint32_t territoryId) const;
+            std::vector<uint32_t> getTerritoryIds() const;
+            std::vector<bool> getHighDemandVector() const;
+            std::vector<uint32_t> getSupply() const;
 
             bool isPrincipalOwner(const Principal& p) const;
             bool isPrincipalBidder(const Principal& p);
             uint32_t fromPrincipalToBidderId(const Principal& p) const;
+            int32_t fromBidderIdToBidderIndex(uint32_t bidderId) const;
             const Principal fromBidderIdToPrincipal(uint32_t bidderId) const;
             uint32_t getEligibilityNumber(uint32_t bidderId) const;
 
-            std::vector<double> getInitialPrices();
-            std::vector<uint32_t> getInitialEligibilities();
-            uint32_t getClockPriceIncrementPercentage();
+            std::vector<double> getInitialPrices() const;
+            std::vector<uint32_t> getInitialEligibilities() const;
+            uint32_t getActivityRequirementPercentage() const;
+            uint32_t getClockPriceIncrementPercentage() const;
+            uint32_t getBiddersN() const;
+            uint32_t getTerritoryN() const;
     };
 
     class DynamicAuctionState
@@ -70,20 +79,22 @@ namespace ClockAuction
 
             Principal submitterPrincipal_;
 
-            std::vector< std::vector<double> > postedPrice_; //vector: [round][territory] = price
-            std::vector< std::vector<double> > clockPrice_;  //vector: [round][territory] = price
-            std::vector< std::vector<uint32_t> > eligibility_; //vector: [round][bidder]    = number
-
-            ErrorReport er_;
+            std::vector< std::vector<double>    > postedPrice_;         //vector: [round][territory-index]  = price
+            std::vector< std::vector<double>    > clockPrice_;          //vector: [round][territory-index]  = price
+            std::vector< std::vector<uint32_t>  > eligibility_;         //vector: [round][bidder-index]     = number
+            std::vector< std::vector<ClockAuction::Bid> > clockBids_;   //vector: [round][bidder-index]     = bid
+            std::vector< std::vector<int32_t>   > excessDemand_;        //vector: [round][territory-index]  = number
+            std::vector< std::vector< std::vector<uint32_t> > > processedLicenses_;   //vector: [round][bidder-index][territory-index] = number
             
         public:
+            ErrorReport er_;
             DynamicAuctionState();
             DynamicAuctionState(auction_state_e auctionState, uint32_t clockRound, bool roundActive, StaticAuctionState& staticAuctionState);
             bool toJsonObject(JSON_Object* root_object) const;
             bool fromJsonObject(const JSON_Object* root_object);
 
             bool isRoundActive() const;
-            void startRound();
+            void startRound(const StaticAuctionState& sState);
             void endRound();
             void endRoundAndAdvance();
             bool isStateClockPhase();
@@ -92,5 +103,12 @@ namespace ClockAuction
 
             void fakeSubmitter(Principal p);
             const Principal getSubmitter() const;
+
+            bool isValidBid(const StaticAuctionState& sState, const Bid& bid);
+            void storeBid(const StaticAuctionState& sState, const Bid& bid);
+            void fillMissingBids(const StaticAuctionState& sState, uint32_t auctionId);
+
+            void processInitialRoundBids(StaticAuctionState& sState, uint32_t auctionId);
+            void processRegularRoundBids(StaticAuctionState& sState, uint32_t auctionId);
     };
 }

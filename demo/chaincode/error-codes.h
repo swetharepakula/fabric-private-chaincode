@@ -30,7 +30,10 @@ typedef enum {
     EC_PRICE_OUT_OF_RANGE,          //18
     EC_ROUND_NOT_ACTIVE,            //19
     EC_NOT_ENOUGH_ELIGIBILITY,      //20
-    EC_TOO_MUCH_DEMAND              //21
+    EC_TOO_MUCH_DEMAND,             //21
+    EC_UNRECOGNIZED_SUBMITTER,      //22
+    EC_BELOW_POSTED_PRICE,          //23
+    EC_ABOVE_CLOCK_PRICE            //24
 } error_codes_e;
 
 namespace ClockAuction

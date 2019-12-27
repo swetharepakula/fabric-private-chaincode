@@ -7,6 +7,12 @@
 #include "bid.h"
 #include "auction-state.h"
 
+ClockAuction::Demand::Demand()
+{}
+
+ClockAuction::Demand::Demand(uint32_t territoryId, uint32_t quantity, double price) : territoryId_(territoryId), quantity_(quantity), price_(price)
+{}
+
 bool ClockAuction::Demand::fromJsonObject(const JSON_Object* root_object)
 {
     {
@@ -34,18 +40,19 @@ void ClockAuction::Demand::toJsonObject(JSON_Object* root_object) const
 bool ClockAuction::Bid::fromJsonObject(const JSON_Object* root_object)
 {
     {
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, !json_object_has_value_of_type(root_object, "auctionId", JSONNumber));
         auctionId_ = json_object_get_number(root_object, "auctionId");
-        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, auctionId_ == 0);
     }
     {
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, !json_object_has_value_of_type(root_object, "round", JSONNumber));
+
         round_ = json_object_get_number(root_object, "round");
-        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, round_ == 0);
     }
     {
         JSON_Array* demand_array = json_object_get_array(root_object, "bids");
         FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, demand_array == 0);
         unsigned int bidsN = json_array_get_count(demand_array);
-        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, bidsN == 0);
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, bidsN == 0 && auctionId_ != 0);
         for(unsigned int i = 0; i < bidsN; i++)
         {
             JSON_Object* o = json_array_get_object(demand_array, i);
@@ -71,7 +78,7 @@ void ClockAuction::Bid::toJsonObject(JSON_Object* root_object) const
         json_array_append_value(demand_array, v);
     }
 }
-
+/*
 bool ClockAuction::Bid::isValid(const ClockAuction::StaticAuctionState& sState, const ClockAuction::DynamicAuctionState& dState)
 {
     // TODO check bidder
@@ -113,8 +120,8 @@ bool ClockAuction::Bid::isValid(const ClockAuction::StaticAuctionState& sState, 
 
     return true;
 }
-
-uint32_t ClockAuction::Bid::sumQuantityDemands()
+*/
+uint32_t ClockAuction::Bid::sumQuantityDemands() const
 {
     uint32_t total = 0;
     for(unsigned int i = 0; i < demands_.size(); i++)
@@ -124,3 +131,12 @@ uint32_t ClockAuction::Bid::sumQuantityDemands()
     return total;
 }
 
+std::vector<uint32_t> ClockAuction::Bid::getDemandedTerritoryIds() const
+{
+    std::vector<uint32_t> demandedTerritoryIds;
+    for(unsigned int i = 0; i < demands_.size(); i++)
+    {
+        demandedTerritoryIds.push_back(demands_[i].territoryId_);
+    }
+    return demandedTerritoryIds;
+}
