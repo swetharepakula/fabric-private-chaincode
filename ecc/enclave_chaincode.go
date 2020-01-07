@@ -180,28 +180,45 @@ func (t *EnclaveChaincode) init(stub shim.ChaincodeStubInterface) pb.Response {
 	}
 
 	// call enclave
-	responseData, signature, err := t.enclave.Init(jsonArgs, stub, t.tlccStub)
-	if err != nil {
-		err_msg := fmt.Sprintf("t.enclave.Init failed. Reason: %s", err)
+	var err_msg string
+	responseData, signature, err_init := t.enclave.Init(jsonArgs, stub, t.tlccStub)
+	if err_init != nil {
+		err_msg = fmt.Sprintf("t.enclave.Init failed: %s", err_init)
 		logger.Errorf(err_msg)
+		// likely a chaincode error, so we stil want response go back ...
+	}
+
+	enclavePk, err_pk := t.enclave.GetPublicKey()
+	if err_pk != nil {
+		err_msg = fmt.Sprintf("init t.enclave.GetPublicKey failed. Reason: %s", err)
+		logger.Errorf(err_msg)
+		// return (and ignore any potential response) as this is a more systematic error
 		return shim.Error(err_msg)
 	}
 
-	enclavePk, err := t.enclave.GetPublicKey()
-	if err != nil {
-		err_msg := fmt.Sprintf("init t.enclave.GetPublicKey failed. Reason: %s", err)
-		logger.Errorf(err_msg)
-		return shim.Error(err_msg)
-	}
-
-	response := &utils.Response{
+	fpcResponse := &utils.Response{
 		ResponseData: responseData,
 		Signature:    signature,
 		PublicKey:    enclavePk,
 	}
-	responseBytes, _ := json.Marshal(response)
+	responseBytes, _ := json.Marshal(fpcResponse)
 
-	return shim.Success(responseBytes)
+	var response pb.Response
+	if err_init == nil {
+		response = pb.Response{
+			Status:  shim.OK,
+			Payload: responseBytes,
+			Message: err_msg,
+		}
+	} else {
+		response = pb.Response{
+			Status:  shim.ERROR,
+			Payload: responseBytes,
+			Message: err_msg,
+		}
+	}
+	logger.Debugf("init response: %v", response)
+	return response
 }
 
 // ============================================================
@@ -225,28 +242,45 @@ func (t *EnclaveChaincode) invoke(stub shim.ChaincodeStubInterface) pb.Response 
 	// TODO: one of the place to fix when integrating end-to-end secure channel to client
 
 	// call enclave
-	responseData, signature, err := t.enclave.Invoke(jsonArgs, pk, stub, t.tlccStub)
-	if err != nil {
-		err_msg := fmt.Sprintf("t.enclave.Invoke failed: %s", err)
+	var err_msg string
+	responseData, signature, err_invoke := t.enclave.Invoke(jsonArgs, pk, stub, t.tlccStub)
+	if err_invoke != nil {
+		err_msg = fmt.Sprintf("t.enclave.Invoke failed: %s", err_invoke)
 		logger.Errorf(err_msg)
+		// likely a chaincode error, so we stil want response go back ...
+	}
+
+	enclavePk, err_pk := t.enclave.GetPublicKey()
+	if err_pk != nil {
+		err_msg = fmt.Sprintf("invoke t.enclave.GetPublicKey failed. Reason: %s", err)
+		logger.Errorf(err_msg)
+		// return (and ignore any potential response) as this is a more systematic error
 		return shim.Error(err_msg)
 	}
 
-	enclavePk, err := t.enclave.GetPublicKey()
-	if err != nil {
-		err_msg := fmt.Sprintf("invoke t.enclave.GetPublicKey failed. Reason: %s", err)
-		logger.Errorf(err_msg)
-		return shim.Error(err_msg)
-	}
-
-	response := &utils.Response{
+	fpcResponse := &utils.Response{
 		ResponseData: responseData,
 		Signature:    signature,
 		PublicKey:    enclavePk,
 	}
-	responseBytes, _ := json.Marshal(response)
+	responseBytes, _ := json.Marshal(fpcResponse)
 
-	return shim.Success(responseBytes)
+	var response pb.Response
+	if err_invoke == nil {
+		response = pb.Response{
+			Status:  shim.OK,
+			Payload: responseBytes,
+			Message: err_msg,
+		}
+	} else {
+		response = pb.Response{
+			Status:  shim.ERROR,
+			Payload: responseBytes,
+			Message: err_msg,
+		}
+	}
+	logger.Debugf("invoke response: %v", response)
+	return response
 }
 
 // ============================================================

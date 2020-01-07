@@ -2,6 +2,21 @@
 Copyright IBM Corp. All Rights Reserved.
 
 SPDX-License-Identifier: Apache-2.0
+
+TODO (eventually):
+  eventually refactor the mock backend as it has the potential of wider
+  usefulness (the same applies also to the fabric gateway).
+  Auction-specific aspects;
+   - the bridge change-code has auction in names (trivial to remove)
+   - the "/api/getRegisteredUsers" and, in particular,
+     "/api/clock_auction/getDefaultAuction", are auction-specific
+   - processing of response
+
+  PS: probably also worth moving the calls to __init & __setup as well
+  as the unpacking of the payload objects, which are specific to FPC
+  to chaincode/fpc_chaincode.go (or handle these calls for non-fpc
+  in chaincode/go_chaincode.go such that actual go chaincode doesn't
+   have to know about it?)
 */
 
 package main
@@ -21,6 +36,7 @@ import (
 )
 
 var flagPort string
+var flagDebug bool
 var stub *shim.MockStub
 var logger = shim.NewLogger("server")
 
@@ -28,10 +44,15 @@ const ccName = "ecc"
 
 func init() {
 	flag.StringVar(&flagPort, "port", "3000", "Port to listen on")
+	flag.BoolVar(&flagDebug, "debug", false, "debug output")
 }
 
 func main() {
 	flag.Parse()
+
+	if flagDebug {
+		logger.SetLevel(shim.LogDebug)
+	}
 
 	stub = shim.NewMockStub(ccName, chaincode.NewMockAuction())
 
@@ -86,23 +107,44 @@ func invoke(c *gin.Context) {
 	}
 
 	res := stub.MockInvoke("someTxID", args)
-	if res.Status != shim.OK {
-		//fmt.Printf("Chaincode error: %s", res.Message)
-		logger.Error(fmt.Sprintf("Chaincode Error: %s\n", res.Message))
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": res.Message})
-		return
+	logger.Debugf("invocation response: status='%v' / payload='%v' / message='%s'", res.Status, res.Payload, res.Message)
+
+	// NOTE: we (try to) return error even if the invocation get success back
+	// but does not contain a response payload. According to the auction
+	// specifications, all queries and transactions should return a response
+	// object (even more specifically, an object which at the very least
+	// contains a 'status' field)
+	var fpcResponse string
+	// we might get payload and response regardless of invocation success,
+	// so try to decode in all cases
+	if res.Payload != nil {
+		var response utils.Response
+		// unwarp ecc response and return only responseData
+		// a proper client would now also verify response signature
+		if err = json.Unmarshal(res.Payload, &response); err == nil {
+			logger.Debugf("decoded fpc response: ResponseData='%s'",
+				response.ResponseData)
+			fpcResponse = string(response.ResponseData)
+		}
+		if err != nil {
+			fpcResponse = fmt.Sprintf("{ \"status\": { \"rc\" : %d, \"message\" : \"No valid response payload received due to errror=%v (status=%v/message=%v)\" } }",
+				499, err, res.Status, res.Message) // TODO: better/smarter errors ..
+		}
+		// Note: we do _not_ check whether fpcResponse is a valid
+		// status object, just that it's not empty
+		if fpcResponse == "" {
+			fpcResponse = fmt.Sprintf("{ \"status\": { \"rc\" : %d, \"message\" : \"Invalid empty response payload received (status=%v/message=%v)\" } }",
+				499, res.Status, res.Message) // TODO: better/smarter errors ..
+		}
+		// TODO (eventually): check also whether it is a proper response,
+		// i.e., a object which contains at least a field 'status' which
+		// itself is an object with a rc and message field ...
+	} else {
+		fpcResponse = fmt.Sprintf("{ \"status\": { \"rc\" : %d, \"message\" : \"No response payload received (status=%v/message=%v)\" } }",
+			499, res.Status, res.Message) // TODO: better/smarter errors ..
 	}
 
-	// unwarp ecc response and return only responseData
-	// a proper client would now also verify response signature
-	var response utils.Response
-	err = json.Unmarshal(res.Payload, &response)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
-
-	c.Data(http.StatusOK, c.ContentType(), response.ResponseData)
+	c.Data(http.StatusOK, c.ContentType(), []byte(fpcResponse))
 }
 
 func parsePayload(c *gin.Context) ([][]byte, error) {
