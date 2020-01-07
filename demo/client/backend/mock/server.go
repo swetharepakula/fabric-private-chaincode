@@ -42,6 +42,8 @@ var logger = shim.NewLogger("server")
 
 const ccName = "ecc"
 
+const mspId = "org1"
+
 func init() {
 	flag.StringVar(&flagPort, "port", "3000", "Port to listen on")
 	flag.BoolVar(&flagDebug, "debug", false, "debug output")
@@ -92,15 +94,21 @@ type Payload struct {
 }
 
 func invoke(c *gin.Context) {
+	stub.ChannelID = "MyChannel"
 
 	user := c.GetHeader("x-user")
 	logger.Debug(fmt.Sprintf("user: %s\n", user))
 
-	// TODO set creator
+	creator, err := generateMockCreator(mspId, user)
+	if err != nil {
+		logger.Error(fmt.Sprintf("Failure to generate Creator: %s\n", err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	stub.Creator = creator
 
 	args, err := parsePayload(c)
 	if err != nil {
-		//fmt.Println("Request Error: " + err.Error())
 		logger.Error(fmt.Sprintf("Request Error: %s\n", err))
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
