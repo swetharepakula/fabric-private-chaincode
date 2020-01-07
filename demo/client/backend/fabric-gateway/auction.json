@@ -14,7 +14,7 @@
 		}, {
 			"id": 2,
 			"name": "b",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 3,
 			"name": "c",
@@ -26,7 +26,7 @@
 		}, {
 			"id": 5,
 			"name": "e",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 6,
 			"name": "f",
@@ -42,7 +42,7 @@
 		}, {
 			"id": 9,
 			"name": "i",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 10,
 			"name": "j",
@@ -72,19 +72,19 @@
 		}, {
 			"id": 5,
 			"name": "e",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 6,
 			"name": "f",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 7,
 			"name": "g",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 8,
 			"name": "h",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 9,
 			"name": "i",
@@ -102,11 +102,11 @@
 		"channels": [{
 			"id": 1,
 			"name": "a",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 2,
 			"name": "b",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 3,
 			"name": "c",
@@ -122,19 +122,19 @@
 		}, {
 			"id": 6,
 			"name": "f",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 7,
 			"name": "g",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 8,
 			"name": "h",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 9,
 			"name": "i",
-			"impairment": 0
+			"impairment": 1
 		}]
 	}, {
 		"id": 4,
@@ -144,15 +144,15 @@
 		"channels": [{
 			"id": 1,
 			"name": "a",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 2,
 			"name": "b",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 3,
 			"name": "c",
-			"impairment": 0
+			"impairment": 1
 		}, {
 			"id": 4,
 			"name": "d",
@@ -171,21 +171,21 @@
 		"id": 1,
 		"displayName": "A-Telecom",
 		"principal": {
-			"mspid": "org1",
+			"mspId": "org1",
 			"dn": "CN=A-Telecom,OU=user+OU=org1"
 		}
 	}, {
 		"id": 2,
 		"displayName": "B-Net",
 		"principal": {
-			"mspid": "org1",
+			"mspId": "org1",
 			"dn": "CN=B-Net,OU=user+OU=org1"
 		}
 	}, {
 		"id": 3,
 		"displayName": "C-Mobile",
 		"principal": {
-			"mspid": "org1",
+			"mspId": "org1",
 			"dn": "CN=C-Mobile,OU=user+OU=org1"
 		}
 	}],

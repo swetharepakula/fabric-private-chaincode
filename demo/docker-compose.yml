@@ -19,6 +19,7 @@ services:
     command: npm start
     volumes:
       - ./client/backend/fabric-gateway/src:/usr/src/app/src
+      - ./client/backend/fabric-gateway/config.json:/usr/src/app/config.json
 
   auction_frontend:
     container_name: auction_frontend

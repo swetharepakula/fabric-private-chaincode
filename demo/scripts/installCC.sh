@@ -17,5 +17,11 @@ export FPC_DIR=/project/src/github.com/hyperledger-labs/fabric-private-chaincode
 docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com ${PEER_CMD} chaincode install -n mockcc -v ${version} --path github.com/hyperledger-labs/fabric-private-chaincode/demo/chaincode/golang/cmd -l golang
 sleep ${WAIT_TIME}
 
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" -e "ORDERER_ADDR=orderer.example.com:7050" peer0.org1.example.com ${PEER_CMD} chaincode instantiate -n mockcc -v ${version} --channelID mychannel -o orderer.example.com:7050 -l golang -c '{"Args":[]}'
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" -e "ORDERER_ADDR=orderer.example.com:7050" peer0.org1.example.com ${PEER_CMD} chaincode instantiate -n mockcc -v ${version} --channelID mychannel -c '{"Args":[]}'
+sleep ${WAIT_TIME}
+
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com ${PEER_CMD} chaincode install -n auctioncc -v ${version} --path demo/chaincode/_build/lib -l fpc-c
+sleep ${WAIT_TIME}
+
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" -e "ORDERER_ADDR=orderer.example.com:7050" peer0.org1.example.com ${PEER_CMD} chaincode instantiate -n auctioncc -v ${version} --channelID mychannel -c '{"Args":[]}'
 sleep ${WAIT_TIME}

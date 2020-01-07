@@ -83,7 +83,7 @@ type Auction struct {
 }
 
 type Principal struct {
-	Mspid string `json:"mspid"`
+	Mspid string `json:"mspId"`
 	Dn    string `json:"dn"`
 }
 
@@ -103,7 +103,11 @@ type Eligibility struct {
 type Bidder struct {
 	Id          int        `json:"id"`
 	DisplayName string     `json:"displayName"`
+<<<<<<< HEAD
 	Principal   *Principal `json:"principal"`
+=======
+	Principle   *Principle `json:"principal"`
+>>>>>>> fc2e874... wip working data
 }
 
 type Channel struct {

@@ -27,6 +27,11 @@ function getTransactionArguments (request) {
 ChaincodeRouter.route('/invoke').post(function (request, response) {
     console.log('>>> POST route api/cc/invoke');
     let args = getTransactionArguments (request);
+    // console.log("")
+    // console.log(typeof JSON.parse(args[2]))
+    // console.log(JSON.parse(args[2]))
+    // console.log("")
+    args[2] = JSON.stringify(JSON.parse(args[2]))
 
     fabricClient.invoke.apply ('unused', args)
         .then(function (result)  {
@@ -41,6 +46,8 @@ ChaincodeRouter.route('/invoke').post(function (request, response) {
 ChaincodeRouter.route('/query').post(function (request, response) {
     console.log('>>> POST route api/cc/query');
     let args = getTransactionArguments (request);
+    console.log(typeof args)
+    console.log("ARGS: ", args)
 
     fabricClient.query.apply ('unused', args)
         .then(function (result)  {

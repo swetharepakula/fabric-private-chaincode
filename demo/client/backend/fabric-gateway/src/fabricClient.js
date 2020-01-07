@@ -303,12 +303,14 @@ async function enrollUser (userName, secret) {
 async function invoke(userName, txName, ...args) {
     console.log ('>>> In function, fabricClient.invoke: ');
     //  first parameter, bSubmitTransaction = true => submitTransaction will be called
+    console.log("ARGS are :", args);
     return submitToFabric (true, userName, txName, ...args);
 }
 
 async function query (userName, txName, ...args) {
     console.log ('>>> In function, fabricClient.query:  ');
     //  first parameter, bSubmitTransaction = false => evaluateTransaction will be called
+    console.log("ARGS are :", args);
     return submitToFabric (false, userName, txName, ...args);
 }
 

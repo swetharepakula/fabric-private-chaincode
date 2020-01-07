@@ -21,14 +21,14 @@ version: '2'
 services:
   peer-base:
     environment:
-      - CORE_CHAINCODE_LOGGING_LEVEL=info
+      - CORE_CHAINCODE_LOGGING_LEVEL=debug
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - DOCKER_HOST=unix:///host/var/run/docker.sock
       - FABRIC_CFG_PATH=/etc/hyperledger/fabric
       - FABRIC_LOGGING_SPEC=info
-      # - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
       - PEER_CMD=${PEER_CMD}
       - ORDERER_ADDR=orderer.example.com:7050
       - CHANNEL_NAME=${CHANNEL_NAME}

@@ -87,9 +87,16 @@ bool ClockAuction::SpectrumAuction::createAuction(const std::string& inputString
 {
     // parse and validate input string
     ClockAuction::SpectrumAuctionMessage inMsg(inputString);
-    if(!inMsg.fromCreateAuctionJson(staticAuctionState_) || !staticAuctionState_.checkValidity())
+    if(!inMsg.fromCreateAuctionJson(staticAuctionState_))
     {
-        LOG_ERROR("creation of static state failed");
+        LOG_ERROR("creation of static state failed in creation");
+        er = staticAuctionState_.getErrorReport();
+        return false;
+    }
+
+    if(!staticAuctionState_.checkValidity())
+    {
+        LOG_ERROR("creation of static state failed in validity");
         er = staticAuctionState_.getErrorReport();
         return false;
     }

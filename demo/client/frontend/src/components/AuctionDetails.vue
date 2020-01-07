@@ -117,7 +117,7 @@ export default {
   },
 
   mounted() {
-    this.$store.dispatch("auction/LOAD_AUCTION", { auctionId: 1 });
+    this.$store.dispatch("auction/LOAD_AUCTION", { auctionId: 401 });
   }
 };
 </script>
