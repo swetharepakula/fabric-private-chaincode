@@ -13,7 +13,7 @@
 #include "bid.h"
 
 #define AUCTION_ID_COUNTER_STRING "AuctionIdCounter"
-#define AUCTION_ID_FIRST_COUNTER_VALUE 401
+#define AUCTION_ID_FIRST_COUNTER_VALUE 1
 
 ClockAuction::SpectrumAuction::SpectrumAuction(shim_ctx_ptr_t ctx) : auctionStorage_(ctx)
 {}
