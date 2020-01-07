@@ -109,8 +109,14 @@ func invoke(c *gin.Context) {
 	res := stub.MockInvoke("someTxID", args)
 	logger.Debugf("invocation response: status='%v' / payload='%v' / message='%s'", res.Status, res.Payload, res.Message)
 
-	// we might get payload and response regardless of invocation success, so try to decode in all cases
+	// NOTE: we (try to) return error even if the invocation get success back
+	// but does not contain a response payload. According to the auction
+	// specifications, all queries and transactions should return a response
+	// object (even more specifically, an object which at the very least
+	// contains a 'status' field)
 	var fpcResponse string
+	// we might get payload and response regardless of invocation success,
+	// so try to decode in all cases
 	if res.Payload != nil {
 		var response utils.Response
 		// unwarp ecc response and return only responseData
@@ -120,15 +126,22 @@ func invoke(c *gin.Context) {
 				response.ResponseData)
 			fpcResponse = string(response.ResponseData)
 		}
-	}
-	// NOTE: we do return error even if the invocation get success back
-	// but does not contain a response payload. According to the auction
-	// specifications, all queries and transactions should return a response
-	// object (even more specifically, an object which at the very least
-	// contains a 'status' field)
-	if err != nil {
-		fpcResponse = fmt.Sprintf("{ \"status\": { \"rc\" : %d, \"message\" : \"No valid response payload received due to errror=%v\" } }",
-			499, err) // TODO: better/smarter errors ..
+		if err != nil {
+			fpcResponse = fmt.Sprintf("{ \"status\": { \"rc\" : %d, \"message\" : \"No valid response payload received due to errror=%v (status=%v/message=%v)\" } }",
+				499, err, res.Status, res.Message) // TODO: better/smarter errors ..
+		}
+		// Note: we do _not_ check whether fpcResponse is a valid
+		// status object, just that it's not empty
+		if fpcResponse == "" {
+			fpcResponse = fmt.Sprintf("{ \"status\": { \"rc\" : %d, \"message\" : \"Invalid empty response payload received (status=%v/message=%v)\" } }",
+				499, res.Status, res.Message) // TODO: better/smarter errors ..
+		}
+		// TODO (eventually): check also whether it is a proper response,
+		// i.e., a object which contains at least a field 'status' which
+		// itself is an object with a rc and message field ...
+	} else {
+		fpcResponse = fmt.Sprintf("{ \"status\": { \"rc\" : %d, \"message\" : \"No response payload received (status=%v/message=%v)\" } }",
+			499, res.Status, res.Message) // TODO: better/smarter errors ..
 	}
 
 	c.Data(http.StatusOK, c.ContentType(), []byte(fpcResponse))
