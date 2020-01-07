@@ -31,8 +31,8 @@ bool ClockAuction::Channel::fromJsonObject(const JSON_Object* root_object)
         name_ = std::string(str);
     }
     {
+        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, !json_object_has_value_of_type(root_object, "impairment", JSONNumber));
         impairment_ = json_object_get_number(root_object, "impairment");
-        FAST_FAIL_CHECK(er_, EC_INVALID_INPUT, impairment_ == 0);
     }
     return true;
 }
