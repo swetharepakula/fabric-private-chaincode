@@ -8,6 +8,7 @@ include $(TOP)/build.mk
 
 SUB_DIRS = utils ercc ecc_enclave ecc tlcc_enclave tlcc examples integration # docs
 PLUGINS = ercc ecc_enclave ecc tlcc_enclave tlcc
+MINIMUM = utils ercc ecc_enclave ecc
 
 build : godeps
 
@@ -43,3 +44,6 @@ godeps: gotools
 
 plugins:
 	$(foreach DIR, $(PLUGINS), $(MAKE) -C $(DIR) build || exit;)
+
+min: godeps
+	$(foreach DIR, $(MINIMUM), $(MAKE) -C $(DIR) build || exit;)
