@@ -46,4 +46,4 @@ clean:
 # 	docker run -v ${PWD}:/project/src/github.com/hyperledger-labs/fabric-private-chaincode/demo/chaincode -v /var/run/docker.sock:/var/run/docker.sock hyperledger/fabric-private-chaincode-dev sh -c make && cd $FPC_PATH/demo/chaincode && make clean && make
 
 docker-build:
-	$(DOCKER) run $(DOCKER_DEV_RUN_OPTS) -v ${PWD}:/project/src/github.com/hyperledger-labs/fabric-private-chaincode/demo/chaincode -v ${PWD}/../../Makefile:/project/src/github.com/hyperledger-labs/fabric-private-chaincode/Makefile hyperledger/fabric-private-chaincode-dev sh -c make && make auction-cc 
+	$(DOCKER) run -v ${PWD}:/project/src/github.com/hyperledger-labs/fabric-private-chaincode/demo/chaincode hyperledger/fabric-private-chaincode-builder sh -c make build

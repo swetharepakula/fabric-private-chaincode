@@ -55,4 +55,9 @@ run: dev
 	$(DOCKER) run $(DOCKER_DEV_RUN_OPTS) -it $(FPC_DOCKER_NAMESPACE)-dev bash
 
 auction-cc: dev
-	$(DOCKER) build -t $(FPC_DOCKER_NAMESPACE)-cc-builder $(DOCKER_DEV_BUILD_OPTS) build-fpc
+	(cd ${TOP}; \
+         $(DOCKER) build -t ${FPC_DOCKER_NAMESPACE}-builder\
+         -f utils/docker/build-fpc/Dockerfile\
+         --build-arg FPC_REPO_URL=file:///tmp/build-src/.git\
+         --build-arg FPC_REPO_BRANCH=$$(git rev-parse --abbrev-ref HEAD)\
+         . )
