@@ -20,3 +20,6 @@ build: $(BUILD_DIR)
 
 clean:
 	-rm -rf $(BUILD_DIR)
+
+docker-build: clean
+	$(DOCKER) run -v ${PWD}:/project/src/github.com/hyperledger-labs/fabric-private-chaincode/demo/chaincode hyperledger/fabric-private-chaincode-cc-builder sh -c make build

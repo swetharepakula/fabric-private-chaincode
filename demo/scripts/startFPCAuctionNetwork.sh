@@ -21,6 +21,11 @@ export SCRIPT_DIR=${FPC_ROOT}/utils/docker-compose/scripts
 "${SCRIPT_DIR}/generate.sh"
 "${SCRIPT_DIR}/start.sh"
 
+# Build FPC Chaincode
+pushd ${DEMO_ROOT}/chaincode/fpc
+    make docker-build
+popd
+
 # Install and Instantiate Auction Chaincode
 "${DEMO_SCRIPTS_DIR}/installCC.sh"
 

@@ -15,7 +15,22 @@ A [specification document](https://docs.google.com/document/d/1YUF4mzzuybzWk3fbX
 ## Build the code
 
 * make sure the the `FPC_PATH` environment variable is set to the root folder of the Fabric Private Chaincode project
-* run `make`
+
+### Locally
+* run `make` to build locally
+
+### Using docker
+* Make sure the [FPC cc-builder](../../../utils/docker/cc-builder/Dockerfile)
+image is built before running the docker-build.
+```
+cd $FPC_PATH/utils/docker/
+make cc-builder
+```
+* Build the Auction Chaincode
+```
+cd $FPC_PATH/demo/chaincode/fpc
+make docker-build
+```
 
 ## Test the code
 
