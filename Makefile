@@ -8,6 +8,7 @@ include $(TOP)/build.mk
 
 SUB_DIRS = utils ercc ecc_enclave ecc tlcc_enclave tlcc examples integration # docs
 PLUGINS = ercc ecc_enclave ecc tlcc_enclave tlcc
+MIN = utils/fabric ercc ecc_enclave ecc
 
 .PHONY: license
 
@@ -45,3 +46,6 @@ godeps: gotools
 
 plugins:
 	$(foreach DIR, $(PLUGINS), $(MAKE) -C $(DIR) build || exit;)
+
+min: godeps
+	$(foreach DIR, $(MIN), $(MAKE) -C $(DIR) build || exit;)
