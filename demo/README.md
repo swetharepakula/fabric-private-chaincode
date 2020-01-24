@@ -13,18 +13,23 @@ to an FPC network, a FPC network and a chaincode to execute the auction logic.
 
 ## Bring Up the Demo End To End
 ### Setup
-To set up all components at once run the start script.
+To set up all components at once run the start script. An [FPC Network](../utils/docker-compose/network-config/docker-compose.yml). The channel `mychannel` will be
+created and be used to install and instantiate all chaincodes. The
+[golang mock chaincode](chaincode/golang) will be instantiated as `mockcc` and
+the [FPC auction chaincode](chaincode/fpc) will be instantiated as `auctioncc`.
+If you need to build the FPC Auction CC using docker add the `--build-cc`
+flag, otherwise the script assumes that the Auction CC has already been built. Both the frontend and fabric-gateway [expose ports](docker-compose.yml) and are
+accessible on the host machine. The frontend can be accessed at `localhost:5000`
+and the fabric-gateway can be accessed at `localhost:3000`.
 ```
 scripts/startFPCAuctionNetwork.sh
 ```
-**NOTE** The above [script](scripts/startFPCAuctionNetwork.sh) will bring up a
-fresh FPC Network and generate new credentials using the FPC Network Setup
+
+**NOTE** The above [script](scripts/startFPCAuctionNetwork.sh), by default, will
+teardown previous iterations of the demo components, bring up a fresh FPC
+Network and generate new credentials using the FPC Network Setup
 [scripts](../utils/docker-compose/scripts). Therefore this script should only be
 run when no other fabric network is running to avoid port collisions.
-
-Both the frontend and fabric-gateway [expose ports](docker-compose.yml) and are
-accessible on the host machine. The frontend can be accessed at `localhost:5000`
-and the fabric-gateway can be accessed at `localhost:3000`.
 
 ### Teardown
 To bring down all of the components and the underlying FPC network run the
@@ -34,7 +39,8 @@ scripts/teardown.sh
 ```
 **NOTE** The script will run the [teardown script](../utils/docker-compose/scripts/teardown.sh)
 in the FPC Network scripts. If you run with the `--clean-slate` flag the script
-will delete all the unused volumes and chaincode images.
+will delete all the unused volumes and clean up `mockcc` and `auctioncc`
+chaincode images.
 
 ## Manually Bring Up The Components
 
@@ -46,12 +52,23 @@ into the peer to make installing chaincode easy.
 ### 2. Install the Auction Chaincode
 Install the mock golang chaincode for the demo.
 
-To install the chaincode you can run [installCC script](scripts/installCC.sh)
+To install the chaincode you can run [installCC script](scripts/installCC.sh).
+The script will install both the [golang mock chaincode](chaincode/golang)
+and the [FPC auction chaincode](chaincode/fpc) that can be run in an enclave.
 ```
 cd $FPC_PATH/demo
 scripts/installCC.sh
 ```
 If you prefer to install it manually use the following steps.
+#### Install the FPC Auction Chaincode
+1. Build the FPC Auction Chaincode using docker.
+```
+cd $FPC_PATH/demo/chaincode/fpc
+make docker-build
+```
+1. The demo directory has been mounted into the peer container for convenience
+
+#### Install Mock Chaincode
 
 1. Exec into the peer container. There are environment variables already set in
 the peer container that will be convenient for next set of steps. Please refer
