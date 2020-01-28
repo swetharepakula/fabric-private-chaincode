@@ -31,22 +31,17 @@ help(){
    options:
        --build-cc:
            As part of bringing up the demo components, the auction cc in demo/chaincode/fpc will
-           be rebuilt using the docker-build make target.
+           be rebuilt using the docker-build make target. The image
+           hyperledger/fabric-private-chaincode-cc-builder must exist to use this option.
        --build-client:
            As part of bringing up the demo components, the Fabric Gateway and the UI docker images 
            will be built or rebuilt using current source code.
        --help,-h:
            Print this help screen.
-       --network-only,-n:
-           The script will not teardown previous iterations of the demo components. It will only
-           bring up a new FPC network and install the chaincodes. Crypto material will not be
-           regenerated. Fabric gateway & frontend UI will not be brought up. The auction users will
-           not be re-registered.
     "
 }
 
 
-BUILD_NETWORK_ONLY=false
 BUILD_CHAINCODE=false
 BUILD_CLIENT=false
 for var in "$@"; do
@@ -57,10 +52,12 @@ for var in "$@"; do
         "--build-client")
             BUILD_CLIENT=true
             ;;
-        "-n"|"--network-only")
-            BUILD_NETWORK_ONLY=true
+        "-h"|"--help")
+            help
+            exit
             ;;
-        "-h"|"--help"|*)
+        *)
+            echo "Invalid option passed: ${var}"
             help
             exit
             ;;
@@ -68,16 +65,15 @@ for var in "$@"; do
     shift
 done
 
-if [ -n "${BUILD_NETWORK_ONLY}" ]; then
-    # Cleanup any previous iterations of the demo
-    "${SCRIPT_DIR}/teardown.sh"
+# Cleanup any previous iterations of the demo
+"${SCRIPT_DIR}/teardown.sh"
 
-    # Generate the necessary credentials and start the FPC network
-    "${SCRIPT_DIR}/generate.sh"
-fi
+# Generate the necessary credentials and start the FPC network
+"${SCRIPT_DIR}/generate.sh"
 
 if [ $BUILD_CHAINCODE ]; then
     echo "Building FPC Auction Chaincode"
+    echo "\$BUILD_CHAINCODE=${BUILD_CHAINCODE}"
 
     # Build FPC Chaincode
     pushd ${DEMO_ROOT}/chaincode/fpc
@@ -93,15 +89,11 @@ fi
 
 # Start the FPC Network using utils/docker-compose scripts
 echo "Starting the FPC Network"
-"${SCRIPT_DIR}/start.sh"
+COMPOSE_IGNORE_ORPHANS=true "${SCRIPT_DIR}/start.sh"
 
 # Install and Instantiate Auction Chaincode
 echo "Installing mockcc and auctioncc"
 "${DEMO_SCRIPTS_DIR}/installCC.sh"
-
-if [ $BUILD_NETWORK_ONLY ]; then
-    exit
-fi
 
 # Register Users
 echo "Registering Auction Users with Fabric CA"

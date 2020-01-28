@@ -26,23 +26,21 @@ help(){
            images.
        --help,-h:
            Print this help screen.
-       --network-only,-n:
-           The script will not teardown the fabric-gateway or the UI. It will only teardown the
-           FPC Network as definied in \$FPC_PATH/utils/docker-compose.
     "
 }
 
 CLEAN_SLATE=false
-NETWORK_ONLY=false
 for var in "$@"; do
     case "$var" in
         "--clean-slate")
-            BUILD_CHAINCODE=true
+            CLEAN_SLATE=true
             ;;
-        "-n"|"--network-only")
-            NETWORK_ONLY=true
+        "-h"|"--help")
+            help
+            exit
             ;;
-        "-h"|"--help"|*)
+        *)
+            echo "Invalid option: ${var}"
             help
             exit
             ;;
@@ -50,10 +48,7 @@ for var in "$@"; do
     shift
 done
 
-if [ ! $NETWORK_ONLY ]; then
-    COMPOSE_IGNORE_ORPHANS=true docker-compose -f ${DEMO_DOCKER_COMPOSE} kill && COMPOSE_IGNORE_ORPHANS=true docker-compose -f ${DEMO_DOCKER_COMPOSE} down
-fi
-
+COMPOSE_IGNORE_ORPHANS=true docker-compose -f ${DEMO_DOCKER_COMPOSE} kill && COMPOSE_IGNORE_ORPHANS=true docker-compose -f ${DEMO_DOCKER_COMPOSE} down
 
 if [ $CLEAN_SLATE ]; then
     "${SCRIPT_DIR}/teardown.sh" --clean-slate
